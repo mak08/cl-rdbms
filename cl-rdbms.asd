@@ -5,7 +5,7 @@
 
 (defsystem "cl-rdbms"
   :description "RDBMS interface"
-  :depends-on ("log2" "cl-utilities")
+  :depends-on ("log2" "cl-utilities" "local-time")
   :default-component-class cl-source-file.cl
   :components ((:module "sql"
                         :pathname "sql"
@@ -32,19 +32,19 @@
                         :components ((:file "pg-socket-package")
                                      (:file "binary-types")
                                      (:file "pg-socket")))
-               (:module "pg-client"
-                        :pathname "pg-client"
-                        :depends-on ("sql" "pg-sql")
-                        :serial t
-                        :components ((:file "pg-client-package")
-                                     (:file "pg-client")))
-               (:module "hdb-odbc"
-                        :pathname "hdb-odbc"
-                        :depends-on ("sql")
-                        :serial t
-                        :components ((:file "hdb-odbc-package")
-                                     (:file "hdb-odbc")
-                                     (:file "sql-serialization")))))
+               #+:unix(:module "pg-client"
+                               :pathname "pg-client"
+                               :depends-on ("sql" "pg-sql")
+                               :serial t
+                               :components ((:file "pg-client-package")
+                                            (:file "pg-client")))
+               #+:windows(:module "hdb-odbc"
+                                  :pathname "hdb-odbc"
+                                  :depends-on ("sql")
+                                  :serial t
+                                  :components ((:file "hdb-odbc-package")
+                                               (:file "hdb-odbc")
+                                               (:file "sql-serialization")))))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
