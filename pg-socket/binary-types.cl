@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Author         Michael Kappert
 ;;; Created        2010-10-12 22:16:25 22:16:25
-;;; Last Modified  <michael 2018-01-12 00:57:24>
+;;; Last Modified  <michael 2018-01-13 00:48:55>
 ;;; Description    Binary Types inspired by Practical Common Lisp
 ;;;                Does not suppert strings with embedded NULs
   
@@ -108,10 +108,14 @@
               `(read-unsigned-byte stream  ,@(cdr typedef))))))
         (:case
             `(case ,(cadr typedef)
-               ,@(mapcar #'case-read-form (cddr typedef))))
+               ,@(mapcar #'case-read-form (cddr typedef))
+               (otherwise
+                (values nil 0))))
         (:ecase
             `(ecase ,(cadr typedef)
-               ,@(mapcar #'case-read-form (cddr typedef))))
+               ,@(mapcar #'case-read-form (cddr typedef))
+               (otherwise
+                (error "Invalid binary case ~a" ,(cadr typedef)))))
         (:sequence
          (destructuring-bind (type &key (byte-length nil) (length nil))
              (cdr typedef)
@@ -158,10 +162,14 @@
         `(write-unsigned-byte stream ,access-form ,@(cdr typedef)))
       (:case
           `(case ,(cadr typedef)
-             ,@(mapcar (lambda (td) (case-write-form access-form td)) (cddr typedef))))
+             ,@(mapcar (lambda (td) (case-write-form access-form td)) (cddr typedef))
+             (otherwise
+              (values nil 0))))
       (:ecase
           `(ecase ,(cadr typedef)
-             ,@(mapcar (lambda (td) (case-write-form access-form td)) (cddr typedef))))
+             ,@(mapcar (lambda (td) (case-write-form access-form td)) (cddr typedef))
+             (otherwise
+              (error "Invalid binary case ~a" ,(cadr typedef)))))
       (:sequence
        (destructuring-bind (type &key (length nil) (byte-length nil) (padbyte nil))
             (cdr typedef)
