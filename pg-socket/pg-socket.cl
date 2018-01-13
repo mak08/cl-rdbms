@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Copyright      (c)  2014
-;;; Last Modified  <michael 2018-01-12 01:00:48>
+;;; Last Modified  <michael 2018-01-13 00:52:32>
 
 (in-package :pg-socket)
 
@@ -42,7 +42,7 @@
 ;;; Queries (SELECT statements)
 
 (defun exec-query (conn sql-statement &key (row-parser #'string-row-parser))
-  (log2:info "~a" sql-statement)
+  ;; (log2:info "~a" sql-statement)
   (let ((message (create-query-message sql-statement)))
     (write-query-message (socket-stream conn) message)
     (force-output (socket-stream conn))
@@ -105,12 +105,12 @@
 ;;; Other SQL Commands
 
 (defun exec-sql (conn sql-statement)
-  (log2:info "~a" sql-statement)
+  ;; (log2:info "~a" sql-statement)
   (let ((message (create-query-message sql-statement)))
     (write-query-message (socket-stream conn) message)
     (force-output (socket-stream conn))
     ;; (wait-for-input (socket-stream conn) :timeout 1000)
-    (sleep 0.000001)
+    ;; (sleep 0.000001)
     (loop :until (listen (socket-stream conn)) :do (sleep 0.000001))
     (let* ((status nil)
            (error nil)
