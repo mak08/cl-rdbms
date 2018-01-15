@@ -2,7 +2,7 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-20 22:15:22 22:15:22
-;;; Last Modified  <michael 2018-01-12 00:27:18>
+;;; Last Modified  <michael 2018-01-15 20:51:31>
 ;;; Description    db interface
 
 (in-package :sql)

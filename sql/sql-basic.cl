@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   
 ;;; Copyright      (c) Michael Kappert 2011
-;;; Last Modified  <michael 2018-01-12 00:26:34>
+;;; Last Modified  <michael 2018-01-14 22:55:48>
 
 (in-package :sql)
 
@@ -29,6 +29,43 @@
  
 
 (defgeneric ensure-tuple-class (spec))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; UUIDs
+
+#+:unix
+(defun create-uuid ()
+  (with-open-file (f "/proc/sys/kernel/random/uuid")
+    (values (read-line f nil nil))))
+
+#+:windows
+(defun create-uuid ()
+  (let ((uuid (uuid-generate))
+        (s (make-array 36 :element-type 'character :initial-element #\-)))
+    (flet ((update (index offset)
+             (let ((j (+ (* index 2) offset)))
+               (setf (aref s j) (hex (ldb (byte 4 4) (aref uuid index))))
+               (setf (aref s (1+ j)) (hex (ldb (byte 4 0) (aref uuid index)))))))
+      (loop :for k :from 0 :to 3 :do (update k 0))
+      (loop :for k :from 4 :to 5 :do (update k 1))
+      (loop :for k :from 6 :to 7 :do (update k 2))
+      (loop :for k :from 8 :to 9 :do (update k 3))
+      (loop :for k :from 10 :to 15 :do (update k 4)))
+    s))
+
+#+:windows
+(defun hex (n)
+  (if (< n 10)
+      (code-char (+ n 48))
+      (code-char (+ n 87))))
+
+#+:windows
+(defun uuid-generate ()
+  (let ((uuid (make-array 16)))
+    (loop
+       :for k :below 16
+       :do (setf (aref uuid k) (random 256)))
+    uuid))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; String operations

@@ -1,0 +1,269 @@
+================================================================================
+API Overview
+--------------------------------------------------------------------------------
+
+
+*   Backends (PG-CLIENT, PG-SOCKET, HDB-ODBC)
+        -   with-connection 
+        -   %connect, %disconnect             
+*   SQL
+
+    *   Transactions
+        -   with-transaction, with-nested-transaction
+        -   %begin, %commit, %rollback
+    *   Data Definition
+        -   %create-role, %create-table etc.
+    *   Data Manipulation & Query
+        -   CRUD operations ?select, ?insert, ?update, ?delete (integrated with tuples)
+        -   Operators/expressions ?count, ?unnest, ?=, ?like...
+    *   Lowlevel
+        -   sql-query
+        -   sql-exec
+
+*   DATAMODEL
+    *   Deploying schemas
+        -   deploy operations :install, :replace, :merge, :delete
+    *   Schema definition
+        -   deftable, defschema
+    *   Tuples
+        -   Types:  tuple, transient-table
+        -   Functions: create-transient-table
+    *   Entities
+        -   defentity
+            -   Composition and reference association of entities 1:n, n:m
+            -   PK and FK definition
+        -   slot accessors
+        -   simple transactional accessors
+            -   create-instance, delete-instance
+            -   get-element, set-element, add-element, remove-element
+        -   retrieve-by-association
+        -   instance buffering (incl update)
+        -   locking
+        -   Entity query language
+             "myUser.MyEmployee[org.boardarea = 'B' AND salary > '100000'] { name, address[kind='home']{ street, city}, salary }"
+
+================================================================================
+Design
+--------------------------------------------------------------------------------
+
+*   Database Entities
+
+    *   Schemas
+        -   A schema can be deployed (only) as a whole
+        -   Tables are created in three steps:
+            1)  table w/o constraints
+            2)  primary keys (deferrable immediate)
+            3)  foreign keys (deferrable deferred)   
+            This allows mutually dependent tables.
+
+        *   Questions
+            -   How to handle dependencies of objects from different schemas?
+
+    *   Tables
+        -   Don't use column constraints, use table constraints instead.
+        -   Always use a schema
+        
+*   Authorization 
+
+    tbd
+
+*   Implementation Questions
+    
+    *   Handling "reserved names"
+        ->  Column names may clash with CL symbols
+            -   ensure-dbi-class creates GF for table columns
+        ->  schema may clash with existing package ?
+
+    *   schema vs. package ?
+        ->  currenty tuple classes for tables are created in the user-defined
+            package
+        ->  no schema packages are created
+        ->  introduce hierarchical schemas/package? => NO
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Design
+
+;; * :privileges (<action> <role>)
+;;   A privilege defines the roles required to perform an action
+;;
+;; * :cnodes (CNODEs)
+;;   - Defines a 1:* (1:0..1, 1:1, 1:0..n, 1:n) composition association.
+;;     This means an associated entity cannot be associated with other
+;;     parent nodes. The existence of the entity depends on the parent;
+;;     composition entities are deleted with the parent.
+;;
+;;   - cnode entities may have cnodes and rnodes
+;;   ? How to MOVE an item from one SalesOrder to another?
+;;     => procedure: create a fresh item instance, copy data, delete original item
+;;
+;;
+;; * :rnodes (RNODEs)
+;;   - Defines a n:m reference association. A referenced entity may
+;;     have multiple parents. It exists independently of the parents
+;;     and is not deleted when a parent is deleted.
+;;
+;; * A defnode definition does not prescribe how the node is used.
+;;   - Node TYPES may be used in CNODEs and RNODEs simultaneously.
+;;   - Node INSTANCES may NOT be used in CNODEs and RNODEs at the same time.
+;;
+;;
+;; * Data model
+;;   For each NODE TYPE create the following tables:
+;;   - <TYPE>_header: (instanceID, parentID, admin data, field_1, ..., field_n)
+;;     - If the NODE TYPE is used as a CNODE, add a parentID field
+;;   - <TYPE>:R:<TYPE'> for each TYPE' used as RNODE in TYPE (instanceID,childID)
+;;   - BUT if the CARDinality is :one, store the referenced instanceID as an extra field value
+
+
+================================================================================
+Node Associations - Use Cases
+--------------------------------------------------------------------------------
+
+*   Composition/Strong Composition/Parent-Child Relationship
+
+    *   Goals
+        -   target contains private/dependent data
+        -   target should be deleted when the parent is deleted
+
+    -   Target is a composite node
+    -   At most one reference to each target (the parent)
+        ! in this association !
+ 
+*   Strict Hierarchies
+
+    -   eg. Sales Order Item
+
+*   Multihierarchies
+
+    -   instances are part of many parent instance
+    -   parent instances may belong to different nodes
+
+    -   eg. 
+        -   Product
+        -   Employee, Manager
+
+*   Roles
+
+    -   instances from the same node or even identical instances are used
+        with different roles in the source,
+        eg.
+            bill-to address
+            ship-to address
+        =>  may be the same but are still formally distinguished 
+
+*   Specialization
+
+        Person, Employee, Customer, Supplier, Manager
+        person + job
+        person + business role
+
+================================================================================
+Association types
+--------------------------------------------------------------------------------
+-   Cardinality:
+    -   The specified cardinality is enforced by the data model
+    -   The association type determines the left cardinality.
+
+*   Composition
+    -   Cardinality 1:1 or 1:n
+    -   Child instances are DESTROYED with the parent instance
+    -   Only ONE PARENT instance may refer to a child instance
+    -   tbd: Child entity usable in many parent entities or in only one?
+    *   Implementation:
+        -   1:1
+            -   <target>_id field in source node
+            -   parent_id field in target node
+        -   1:n
+            -   parent_id field in target node   
+
+*   Delegation
+    -   tbd: needed?
+    -   MANY PARENT instances can refer to a child instance
+    -   Cardinality 1:1, 1:n, m:n
+    
+*   Reference
+    -   Cardinality 1:1, 1:n, n:m
+    -   Target instances are NOT DESTROYED with the source instance   
+    -   MANY SOURCE instances may refer to a target instance
+
+*   User constraints:
+    -   How to integrate user constraints into model lifecycle/transitions?
+    
+================================================================================
+
+node
+    fields
+    compositions
+    references
+
+DB mapping for <node>
+
+Entity                  Card    Type     shareable  DB mapping / Implementation (read/create/update/rba/save)
+--------------------------------------------------------------------------------
+node                    ./.     node                table <node>
+                                                    
+field                   1       basic    no         column <field> in <node>, contains field value
+                                                    
+composition-node on     1       node     no         column <field> (FK <node2>) in <node>, 
+<node2>                                             contains <node2> key (ID)  
+                                                    
+composition-node        n       node     no         column 'parentID' (FK <node>) in node table for <node2>,
+on <node2>                                          contains <node> key (ID)
+                                                    
+reference-node on       1       node     yes        column <refnode> (FK <node2>) in node table <node>,
+<node2>                                             contains <node2> key (ID)
+                                                    
+reference-node <rnode>  n       node     yes        table <node>*<rnode>
+on <node2>                                          with columns parentID(FK <node>), childID (FK <node2>)
+
+--------------------------------------------------------------------------------
+*   other entity/card/type combinations are not allowed,
+    eg. field/n/                    => use composition or reference node
+        field/x/node                => use composition/x/node
+        composition/x/primitive     => use field
+
+*   At most one compositon for a node <node2> can exist.
+    -   wether from the same or other <node>s !
+
+*   Introducing a composition for a node <node2> creates a virtual field on <node2>
+    which is setf'able.
+
+*   Multiple reference assocs between <node1> and <node2> should be possible.
+    <node1> can have assocs to other nodes <node3>.
+    <node2> can be associated with other nodes. 
+
+    Implementation alternatives
+    -   Reference assocs are implemented by separate assoc tables. 
+        a) Create separare asoc table for each assoc
+        b) Include assoc name as a key field in assoc table for <node1>, <node2>
+    -   (Alternative: parentID + join?)
+
+*   distinguish shareable and non-shareable node types?
+    =>  use non-shareable node types in compositions.
+    =>  these have an Owner, the parent node type.
+
+--------------------------------------------------------------------------------
+
+================================================================================
+Notes
+--------------------------------------------------------------------------------
+
+*   READ performace
+    Some performance issue arise when trying to manipulate data through
+    object instances, if the application wants to mass-process records - ie,
+    load and display *all* records of one entity.
+    -   In the most straight-forward approach, each element access (at least each 
+        non-field=reference access) triggers a database roundtrip. This is can become
+        slow even for applications with fewer than 1000 records per entitiy.
+    -   By means of buffering and locking records, each record needs to be retrieved
+        at most once. This gives a solid improvement but is still too slow for
+        applciations with several thousand records per entity.
+    =>  The API must be able to fetch multiple instances, with associated data in
+        the required detail, in a single DB roundtrip.
+    =>  However, "deep" mass loading is difficult and seems wasteful:
+        -   if association targets are mass-loaded in a single separate select,
+            they must be connected with the source entities - this is O(n²) ?!
+        -   details (like SO Items details) cannot be displayed anyway
+ 
+----------------------------------------------------------------------------------
+================================================================================

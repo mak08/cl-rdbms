@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2018-01-12 00:26:44>
+;;; Last Modified <michael 2018-01-14 20:32:48>
  
 (in-package :sql)
  
@@ -16,11 +16,11 @@
   (table-expression "")
   (lock nil))
  
-(defmethod sql:sql-query ((conn t) (sql-statement sql-query))
-  (sql:sql-query conn
-                 (let ((*print-circle* nil))
-                   (with-output-to-string (s)
-                     (serialize-for-connection conn sql-statement s)))))
+(defmethod sql-query ((conn t) (sql-statement sql-query))
+  (sql-query conn
+             (let ((*print-circle* nil))
+               (with-output-to-string (s)
+                 (serialize-for-connection conn sql-statement s)))))
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Update, Insert, Delete

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2018-01-12 01:49:10>
+;;; Last Modified <michael 2018-01-14 23:28:08>
 
 (in-package "PG-CLIENT")
 
@@ -38,16 +38,20 @@
 
 (defmacro with-open-connection ((connection database &key (user "crmadmin") (password user)) &body forms)
   "Provides a new connection"
-  `(progn 
-     (let ((,connection
-             (%connect% ,database
-                       :user ,user
-                       :password ,password)))
-       (unwind-protect
-         (progn ,@forms)
-         (%disconnect% ,connection)))))
+  `(let ((,connection
+          (%connect% ,database
+                     :user ,user
+                     :password ,password))
+         (values))
+     (unwind-protect
+          (setf values
+                (multiple-value-list 
+                 (progn ,@forms)))
+       (%disconnect% ,connection))
+     (values-list values)))
 
 (defmethod sql:sql-exec ((conn pg-client-connection) (sql-statement string))
+  (log2:info "~a" sql-statement)
   (sql-exec% conn sql-statement))
 
 (defmethod sql:sql-query ((conn pg-client-connection) (sql-statement string))

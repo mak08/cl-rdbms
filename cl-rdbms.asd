@@ -5,7 +5,7 @@
 
 (defsystem "cl-rdbms"
   :description "RDBMS interface"
-  :depends-on ("log2" "cl-utilities" "local-time")
+  :depends-on ("log2" "cl-utilities" "local-time" "rdparse")
   :default-component-class cl-source-file.cl
   :components ((:module "sql"
                         :pathname "sql"
@@ -44,7 +44,16 @@
                                   :serial t
                                   :components ((:file "hdb-odbc-package")
                                                (:file "hdb-odbc")
-                                               (:file "sql-serialization")))))
+                                               (:file "sql-serialization")))
+               (:module "datamodel"
+                        :serial t
+                        :depends-on ("sql")
+                        :components ((:file "package")
+                                     (:file "lifecycle")
+                                     (:file "entity")   
+                                     (:file "entity-api")
+                                     (:file "entity-syntax")
+                                     (:file "eeql")))))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

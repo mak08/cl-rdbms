@@ -1,14 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Author         Michael Kappert
 ;;; Created        2010-10-12 22:16:25 22:16:25
-;;; Last Modified  <michael 2018-01-13 00:48:55>
+;;; Last Modified  <michael 2018-01-14 17:57:21>
 ;;; Description    Binary Types inspired by Practical Common Lisp
 ;;;                Does not suppert strings with embedded NULs
   
 (in-package :pg-socket)
-
-(export '(define-binary-type
-          define-out-message))
 
 (declaim (optimize (speed 3) (safety 1) (space 1)))
 
