@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-01-12 00:27:02>
+;;; Last Modified <michael 2018-01-27 20:54:52>
 
 (in-package :sql)
 
@@ -163,7 +163,7 @@
 
 (defmethod serialize-for-connection ((connection t) (thing sql-tuple) stream)
   ;; This is appropriate for INSERT but not for other references of TUPLE
-  (format stream "VALUES (")
+  (format stream " VALUES (")
   (!{} connection (sql-tuple-elements thing) stream)
   (format stream ")"))
 
