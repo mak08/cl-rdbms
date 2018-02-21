@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Copyright      (c)  2013
-;;; Last Modified  <michael 2018-01-12 01:02:45>
+;;; Last Modified  <D037165 2018-02-21 12:51:56>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (in-package :hdb-odbc)
@@ -105,7 +105,7 @@
 #-cffi-features:x86-64
 (use-foreign-library libodbcHD32)
 
-(defvar *db-encoding* :iso-8859-15)
+(defvar *db-encoding* :utf-8)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Programmer Interface
@@ -135,14 +135,28 @@
 (defconstant SQL_HANDLE_DBC             2)
 (defconstant SQL_HANDLE_STMT            3)
 (defconstant SQL_HANDLE_DESC            4)
-(defconstant SQL_DEFAULT                1)
+(defconstant SQL_DEFAULT               99)
 (defconstant SQL_CHAR                   1)  ;; SQL Type
-(defconstant SQL_C_CHAR                 1)  ;; C Type
-(defconstant SQL_C_DEFAULT             99)  ;; C type
-(defconstant SQL_C_WCHAR               -8)  ;; ?
+(defconstant SQL_VARCHAR               12)  ;; SQL Type
+
+;; SQL C Types - Constants from sqlext.h.
+;; Most constants refer to constants from sql.h
+(defconstant SQL_C_CHAR                 1)
+(defconstant SQL_C_NUMERIC              2)
+(defconstant SQL_C_LONG                 4)
+(defconstant SQL_C_SHORT                5)
+(defconstant SQL_C_FLOAT                7) ;; SQL_C_FLOAT = SQL_REAL but SQL_FLOAT also exists !?
+(defconstant SQL_C_DOUBLE               8)
+(defconstant SQL_C_WCHAR               -8)
+(defconstant SQL_C_TIMESTAMP           11)
+
+(defconstant SQL_C_DEFAULT             99)
 
 (defconstant SQL_NULL_DATA -1)
 (defconstant SQL_NTS -3)
+
+(defconstant SQL_CONNECT_OPT_DRVR_START 1000)
+
 
 (defconstant SQL_ATTR_AUTOCOMMIT      102)
 (defconstant SQL_AUTOCOMMIT_OFF              0)
@@ -463,9 +477,17 @@ Note that statement handles are freed upon successful execution of the statement
       data)))
 
 (defun sql-get-data (statement-handle column)
-  (let* ((target-type sql_c_char)
-         (buffer-length 512)
+  (let* ((buffer-length 2048)
+         ;; Convert all values to string for now.
+         ;; TODO: Use proper types for target-type, target-value and convert-array-to-lisp 
          (target-value (foreign-alloc :uchar :count buffer-length))
+         (target-type (cond
+                        ((< (column-sql-type column) 32768)
+                          SQL_C_CHAR)
+                        ((= (column-sql-type column) 65531)
+                          SQL_C_CHAR)
+                        (t
+                          SQL_C_DEFAULT)))
          (encoding *db-encoding*)
          (str-len (foreign-alloc :int)))
     (loop
