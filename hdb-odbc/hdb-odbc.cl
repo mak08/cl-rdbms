@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Copyright      (c)  2013
-;;; Last Modified  <D037165 2018-02-21 12:51:56>
+;;; Last Modified  <D037165 2018-03-15 12:03:50>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (in-package :hdb-odbc)
@@ -456,7 +456,8 @@ Note that statement handles are freed upon successful execution of the statement
   (let ((result
           (ecase lisp-type
             (:character (make-string length))
-            (:integer (make-array length)))))
+            (:integer (make-array length))
+            (:byte (make-array length)))))
     (unless (null-pointer-p foreign-array)
       (loop
          :for k :below length
@@ -464,15 +465,19 @@ Note that statement handles are freed upon successful execution of the statement
          :do (ecase lisp-type
                (:character
                  (setf (aref (the simple-string result) k) (code-char c)))
-               (:integer
+               ((:byte :integer)
                  (setf (aref result k) c))))
       (values result))))
   
 (defun append-data (data target-value indicator column)
   (cond
     ((> indicator 0)
-      (map 'string #'code-char
-           (convert-array-to-lisp target-value :uint8 indicator :lisp-type :integer)))
+      (case (column-sql-type column)
+        ((65532)
+          (convert-array-to-lisp target-value :uint8 indicator :lisp-type :byte))
+        (otherwise
+          (map 'string #'code-char
+               (convert-array-to-lisp target-value :uint8 indicator :lisp-type :integer)))))
     (t
       data)))
 
@@ -484,10 +489,10 @@ Note that statement handles are freed upon successful execution of the statement
          (target-type (cond
                         ((< (column-sql-type column) 32768)
                           SQL_C_CHAR)
-                        ((= (column-sql-type column) 65531)
-                          SQL_C_CHAR)
+                        ((= (column-sql-type column) 65532)
+                          SQL_DEFAULT)
                         (t
-                          SQL_C_DEFAULT)))
+                          SQL_C_CHAR)))
          (encoding *db-encoding*)
          (str-len (foreign-alloc :int)))
     (loop
