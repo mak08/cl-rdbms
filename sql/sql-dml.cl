@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2018-01-14 20:32:48>
+;;; Last Modified <michael 2018-03-15 21:55:08>
  
 (in-package :sql)
  
@@ -103,8 +103,16 @@
                                  (list columns)
                                  columns)
                     :values values)))
- 
-(defun ?insert (values  &key into columns)
+
+(defgeneric ?insert (values &key into columns))
+
+(defmethod ?insert ((values tuple)
+                    &key
+                      (into (tuple-table values))
+                      (columns (tuple-columns values)))
+  (?insert (tuple-values values) :into into :columns columns))
+  
+(defmethod ?insert ((values t) &key into columns)
   (sql:sql-exec
    *current-connection*
    (make-sql-insert :table into

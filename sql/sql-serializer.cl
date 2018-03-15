@@ -1,12 +1,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-01-27 20:54:52>
+;;; Last Modified <michael 2018-03-15 22:19:55>
 
 (in-package :sql)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; t, number, string, list
+
+
+(defmethod serialize-for-connection ((connection t) (thing null) stream)
+  (format stream "~a" "DEFAULT"))
 
 (defmethod serialize-for-connection ((connection t) (thing t) stream)
   (format stream "~a" thing))
@@ -99,10 +103,10 @@
 
 (defmethod serialize-for-connection ((connection t) (thing sql-insert) stream)
   (format stream "INSERT INTO ~a " (sql-insert-table thing))
-  (@[] connection (sql-insert-columns thing) stream)
-  ;; Printing "VALUES" here also doesn't work. S-F-C needs a context parameter.
-  (serialize-for-connection connection (sql-insert-values thing) stream))
-
+  (@[] connection (sql-insert-columns thing) stream :prefix "(" :suffix ") ")
+  (format stream "VALUES (")
+  (serialize-for-connection connection (sql-insert-values thing) stream)
+  (format stream ")"))
 
 (defmethod serialize-for-connection ((connection t) (thing sql-update) stream)
   (format stream "UPDATE ~a SET " (sql-update-table thing))

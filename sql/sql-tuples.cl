@@ -2,7 +2,7 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-20 22:15:22 22:15:22
-;;; Last Modified  <michael 2018-01-15 20:51:31>
+;;; Last Modified  <michael 2018-03-15 22:10:44>
 ;;; Description    db interface
 
 (in-package :sql)
@@ -147,6 +147,20 @@
     (format stream "<~a ~:{~a: ~a~:^, ~}>"
             (class-name (class-of thing))
             slots-and-values)))
+
+(defmethod tuple-table ((tuple tuple))
+  (class-name (class-of tuple)))
+
+(defmethod tuple-columns ((tuple tuple))
+  (mapcar #'slot-definition-name (class-slots (class-of tuple))))
+
+(defmethod tuple-values ((tuple tuple))
+  (let ((slot-names (mapcar #'slot-definition-name (class-slots (class-of tuple)))))
+    (mapcar (lambda (slot)
+              (if (slot-boundp tuple slot)
+                  (slot-value tuple slot)
+                  nil))
+            slot-names)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DB table tuples

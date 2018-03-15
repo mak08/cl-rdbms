@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-01-14 22:56:48>
+;;; Last Modified <michael 2018-03-15 21:58:34>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -233,6 +233,9 @@
    ensure-tuple-class
    ensure-tuple-class%
    tuples
+   tuple-table
+   tuple-columns
+   tuple-values
    db-tuple
    transient-table
    create-transient-table
