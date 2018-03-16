@@ -2,7 +2,7 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-20 22:15:22 22:15:22
-;;; Last Modified  <michael 2018-03-15 22:10:44>
+;;; Last Modified  <D037165 2018-03-16 10:20:26>
 ;;; Description    db interface
 
 (in-package :sql)
@@ -161,6 +161,12 @@
                   (slot-value tuple slot)
                   nil))
             slot-names)))
+
+(defmethod ?insert ((values tuple)
+                    &key
+                      (into (tuple-table values))
+                      (columns (tuple-columns values)))
+  (?insert (tuple-values values) :into into :columns columns))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DB table tuples
