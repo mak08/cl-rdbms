@@ -1,18 +1,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Copyright      (c)  2015
-;;; Last Modified  <michael 2018-01-12 00:25:47>
+;;; Last Modified  <D037165 2018-03-16 10:22:36>
 
 (in-package :sql)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-
-(defmethod sql:serialize-for-connection ((connection hdb-odbc::odbc-connection) (thing sql-insert) stream)
-  (format stream "INSERT INTO ~a " (sql-insert-table thing))
-  (@[] connection (sql-insert-columns thing) stream)
-  (format stream " VALUES ")
-  (@[] connection (sql-insert-values thing) stream))
 
 (defmethod serialize-for-connection ((connection t) (thing sql-update) stream)
   (format stream "UPDATE ~a SET " (sql-update-table thing))
