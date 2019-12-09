@@ -32,19 +32,27 @@
                         :components ((:file "pg-socket-package")
                                      (:file "binary-types")
                                      (:file "pg-socket")))
-               #+:unix(:module "pg-client"
-                               :pathname "pg-client"
-                               :depends-on ("sql" "pg-sql")
-                               :serial t
-                               :components ((:file "pg-client-package")
-                                            (:file "pg-client")))
-               #+:windows(:module "hdb-odbc"
-                                  :pathname "hdb-odbc"
-                                  :depends-on ("sql")
-                                  :serial t
-                                  :components ((:file "hdb-odbc-package")
-                                               (:file "hdb-odbc")
-                                               (:file "sql-serialization")))
+               #+:unix
+               (:module "pg-client"
+                        :pathname "pg-client"
+                        :depends-on ("sql" "pg-sql")
+                        :serial t
+                        :components ((:file "pg-client-package")
+                                     (:file "pg-client")))
+               (:module "sqlite-client"
+                        :pathname "sqlite-client"
+                        :depends-on ("sql")
+                        :serial t
+                        :components ((:file "sqlite-client-package")
+                                     (:file "sqlite-client")))
+               #+:windows
+               (:module "hdb-odbc"
+                        :pathname "hdb-odbc"
+                        :depends-on ("sql")
+                        :serial t
+                        :components ((:file "hdb-odbc-package")
+                                     (:file "hdb-odbc")
+                                     (:file "sql-serialization")))
                (:module "datamodel"
                         :serial t
                         :depends-on ("sql")
