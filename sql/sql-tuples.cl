@@ -2,14 +2,14 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-20 22:15:22 22:15:22
-;;; Last Modified  <D037165 2018-03-16 10:20:26>
+;;; Last Modified  <michael 2019-12-08 11:10:40>
 ;;; Description    db interface
 
 (in-package :sql)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Use Case
-;;    - create for on UI, enter values, create table for form, persist entered values
+;;    - create form on UI, enter values, create table for form, persist entered values
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; - Architecture:

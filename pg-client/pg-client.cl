@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2018-01-14 23:28:08>
+;;; Last Modified <michael 2019-12-08 01:14:54>
 
 (in-package "PG-CLIENT")
 
@@ -114,8 +114,7 @@
 (defvar *simulate* nil)
 
 (defun sql-exec% (conn sql-statement)
-  ;; log2 is awfully slow even if nothing is logged.
-  ;; (log2:info "~a" sql-statement)
+  (log2:trace "~a" sql-statement)
   (when (not *simulate*)
     (let* ((result (PQexec (conn conn) sql-statement))
            (status (PQresultStatus result)))
