@@ -1,14 +1,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Author         Michael Kappert
-;;; Copyright      (c) Michael Kappert 2011
-;;; Created        2011-10-29 16:24:53 16:24:53
-;;; Last Modified  <michael 2018-01-14 20:31:25>
-;;; Description    Application LifeCycle Management
+;;; Description    Lifeycle functions
+;;; Author         Michael Kappert 2013
+;;; Last Modified  <michael 2019-12-10 20:25:15>
+
 
 (in-package :datamodel)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Deploying
+;; Create database
 
 (defun create-db (dbinfo superuser su-password)
   (%create-role (dbinfo-user dbinfo)
@@ -38,11 +37,10 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Perform deployment actions of the application:
-;;  - Remove old definitions from the DB.
-;;    - note that tables may be used by other applications
-;;  - Create roles, tables and users on the DB
-;;  - Create initial table contents"
+;; Perform deployment actions
+;;  - Delete old definitions
+;;  - Create roles, tables and users
+;;  - Create initial table contents
 
 (defun redeploy (schema database user-name password &key (redeploy nil))
   (with-open-connection (c database :user user-name :password password)

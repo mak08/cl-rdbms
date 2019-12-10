@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-09 23:28:52>
+;;; Last Modified <michael 2019-12-10 21:44:44>
 
 (in-package "SQLITE-CLIENT")
 
@@ -72,6 +72,11 @@
                  (progn ,@forms)))
        (%disconnect% ,connection))
      (values-list values)))
+
+(defmacro with-current-connection ((connection database) &body forms)
+  `(with-open-connection (,connection ,database)
+     (with-connection (,connection)
+       ,@forms)))
 
 (defmethod sql:sql-exec ((conn sqlite-connection) (sql-statement string))
   (log2:info "~a" sql-statement)

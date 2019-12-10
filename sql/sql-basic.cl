@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   
 ;;; Copyright      (c) Michael Kappert 2011
-;;; Last Modified  <michael 2018-01-14 22:55:48>
+;;; Last Modified  <michael 2019-12-10 21:50:54>
 
 (in-package :sql)
 
@@ -26,7 +26,8 @@
      (let ((*current-connection* ,connection))
        (declare (special *current-connection*))
        ,@forms)))
- 
+
+(defgeneric map-db-type (connection type))
 
 (defgeneric ensure-tuple-class (spec))
 

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-03-15 21:58:34>
+;;; Last Modified <michael 2019-12-10 21:11:09>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -261,7 +261,10 @@
    ;; UUIDs
    create-uuid
    
-   ;;
+   ;; Internal use
+   !{}
+   @[]
+   ?[]
    make-keyword))
 
 ;;; EOF

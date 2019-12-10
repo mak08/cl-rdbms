@@ -44,7 +44,8 @@
                         :depends-on ("sql")
                         :serial t
                         :components ((:file "sqlite-client-package")
-                                     (:file "sqlite-client")))
+                                     (:file "sqlite-client")
+                                     (:file "sqlite-sql")))
                #+:windows
                (:module "hdb-odbc"
                         :pathname "hdb-odbc"
