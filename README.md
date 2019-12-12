@@ -12,10 +12,10 @@ d mine.
 ## Notes
 
 ### Table definition
-*	Function `create-tabdef (&key schema name columns constraints)`
+*	Function **create-tabdef** (&key *schema* *name* *columns* *constraints*)
 
 #### Column constraints
-*	Function `**make-colcon** *label* notnull check default unique references`
+*	Function **make-colcon** *label* notnull check default unique references
 
 #### Primary keys
 
