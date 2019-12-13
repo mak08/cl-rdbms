@@ -110,7 +110,7 @@ d mine.
                     	  ("lastname" :datatype +smallname+))
           	:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
-	*  Macro **deftable** (*name* &key *schema* *columns* *constraints*)
+*	Macro **deftable** (*name* &key *schema* *columns* *constraints*)
 
 	Provides an interface to define a table including table constraints and columns with datatype and columns constraints.
 
