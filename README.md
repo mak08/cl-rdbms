@@ -118,7 +118,7 @@ d mine.
 
 	**use-schema** creates the specified tables in the named schema on the database. 
 	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
-	**use-schema** also create [tuple class] for each table in the schema. 
+	**use-schema** also creates a [tuple class](tbd) for each table in the schema. 
 
 *	Function **get-schema-by-name** (name)
 
