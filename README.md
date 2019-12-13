@@ -109,6 +109,6 @@ Create a table with the properties specified in *tabdef*
 
 *	Function **make-unique-key** (&key *schema* *name* *columns*)
 
-*	Function **make-foreing-key** (&key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict))	
+*	Function **make-foreign-key** (&key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict))	
 
 	Foreign keys are currently created as INITIALLY DEFERRED
