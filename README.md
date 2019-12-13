@@ -90,39 +90,39 @@ d mine.
 
 *	Macro **defschema** (*name* &rest *definitions*)
 
-This macro provides an interface for defining a database schema in one go.
+	This macro provides an interface for defining a database schema in one go.
 
-**Example**
+	**Example**
 
-```
-(defschema "example"
-  (:table "book"
-          :columns (("id" :datatype +serial+)
-                    ("title" :datatype +text+)
-                    ("author_id"  :datatype +int+)
-                    ("status" :datatype +int+))
-          :constraints ((:primary-key "pk_book" :columns ("id"))
-                        (:unique-key "pk_book_title" :columns ("title"))))
+	```
+	(defschema "example"
+  	(:table "book"
+          	:columns (("id" :datatype +serial+)
+                    	  ("title" :datatype +text+)
+                    	  ("author_id"  :datatype +int+)
+                    	  ("status" :datatype +int+))
+          	:constraints ((:primary-key "pk_book" :columns ("id"))
+                              (:unique-key "pk_book_title" :columns ("title"))))
   
-  (:table "author"
-          :columns (("id" :datatype +serial+)
-                    ("firstname" :datatype +smallname+)
-                    ("lastname" :datatype +smallname+))
-          :constraints ((:primary-key "pk_author" :columns ("id")))))
-```
-*  Macro **deftable** (*name* &key *schema* *columns* *constraints*)
+  	(:table "author"
+          	:columns (("id" :datatype +serial+)
+                	  ("firstname" :datatype +smallname+)
+                    	  ("lastname" :datatype +smallname+))
+          	:constraints ((:primary-key "pk_author" :columns ("id")))))
+	```
+	*  Macro **deftable** (*name* &key *schema* *columns* *constraints*)
 
-Provides an interface to define a table including table constraints and columns with datatype and columns constraints.
+	Provides an interface to define a table including table constraints and columns with datatype and columns constraints.
 
 ### Table definition
 
 *	Function **%drop-table** (*tabdef* &key (*if-does-not-exist* :error) (*if-not-empty* :error))
 
-Drop the table specified in *tabdef*. Only the tabdef name and schema need to be provided.
+	Drop the table specified in *tabdef*. Only the tabdef name and schema need to be provided.
 
 *	Function **%create-table** (*tabdef*)
 
-Create a table with the properties specified in *tabdef*
+	Create a table with the properties specified in *tabdef*
 
 *	Function **create-tabdef** (&key *schema* *name* *columns* *constraints*)
 
