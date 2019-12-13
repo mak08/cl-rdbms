@@ -147,6 +147,7 @@ d mine.
 *	Function **make-colref** (&key *table* *column* *matchtype* *on-delete* *on-update*)
 
 *	Function **make-primary-key** (&key *schema* *name* *columns*)
+
 	Primary keys are created INITIALLY IMMEDIATE.
 
 *	Function **make-unique-key** (&key *schema* *name* *columns*)
@@ -158,6 +159,7 @@ d mine.
 ## Data Manipulation
 
 *	Macro **?select** (*select-list* &key (*into* nil) *appending* *from* *where* *groupby* *having* (*lock-mode* :none) (*nowait* nil))
+
 	**Example**
 	```
         (?select (cons 'entity_id (mapcar #'name (entity-fields target-entity)))
