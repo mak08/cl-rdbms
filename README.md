@@ -86,14 +86,29 @@ d mine.
 
 ## Notes
 
+
 ### Table definition
+
+*	Function **%drop-table** (*tabdef* &key (*if-does-not-exist* :error) (*if-not-empty* :error))
+
+Drop the table specified in *tabdef*. Only the tabdef name and schema need to be provided.
+
+*	Function **%create-table** (*tabdef*)
+
+Create a table with the properties specified in *tabdef*
+
 *	Function **create-tabdef** (&key *schema* *name* *columns* *constraints*)
 
-#### Column constraints
-*	Function **make-colcon** *label* notnull check default unique references
+*	Function **make-coldef** (&key *name* *datatype* *default-value* *collation* *constraint*)
 
-#### Primary keys
+*	Function **make-colcon** (&key *label* *notnull* *check* *default* *unique* *references*)
 
-#### Foreign keys
+*	Function **make-colref** (&key *table* *column* *matchtype* *on-delete* *on-update*)
 
-Foreign keys are currently created as INITIALLY DEFERRED
+*	Function **make-primary-key** (&key *schema* *name* *columns*)
+
+*	Function **make-unique-key** (&key *schema* *name* *columns*)
+
+*	Function **make-foreing-key** (&key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict))	
+
+	Foreign keys are currently created as INITIALLY DEFERRED
