@@ -86,35 +86,46 @@ d mine.
 
 ## Data Definition
 
-### Macros
+### Schemas
 
 *	Macro **defschema** (*name* &rest *definitions*)
 
-	This macro provides an interface for defining a database schema in one go.
+	This macro provides an interface for defining a database schema in one go. 
+	The schema is defined an made accessible by its name, but it is not created on the database. 
+	Call **use-schema** to create the schema on the database.
 
 	**Example**
 
 	```
 	(defschema "example"
-  	(:table "book"
-          	:columns (("id" :datatype +serial+)
-                    	  ("title" :datatype +text+)
-                    	  ("author_id"  :datatype +int+)
-                    	  ("status" :datatype +int+))
+		(:table "book"
+			:columns (("id" :datatype +serial+)
+					  ("title" :datatype +text+)
+                      ("author_id"  :datatype +int+)
+                      ("status" :datatype +int+))
           	:constraints ((:primary-key "pk_book" :columns ("id"))
-                              (:unique-key "pk_book_title" :columns ("title"))))
+					      (:unique-key "pk_book_title" :columns ("title"))))
   
   	(:table "author"
           	:columns (("id" :datatype +serial+)
                 	  ("firstname" :datatype +smallname+)
-                    	  ("lastname" :datatype +smallname+))
+                      ("lastname" :datatype +smallname+))
           	:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
+	
+*	Method **use-schema** ((*name* string))
+
+*	Method **use-schema** ((*schema* schema))
+
+*	Function **get-schema-by-name** (name)
+
+
+### Tables
+
 *	Macro **deftable** (*name* &key *schema* *columns* *constraints*)
 
-	Provides an interface to define a table including table constraints and columns with datatype and columns constraints.
-
-### Table definition
+	This macro provides an interface to define a table including table constraints and columns with datatype and columns constraints.
+	The table definition is not executed by the macro itself. Call **%create-table** to create the table on the database.
 
 *	Function **%drop-table** (*tabdef* &key (*if-does-not-exist* :error) (*if-not-empty* :error))
 
