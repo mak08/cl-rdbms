@@ -103,14 +103,14 @@ d mine.
 					  ("title" :datatype +text+)
                       ("author_id"  :datatype +int+)
                       ("status" :datatype +int+))
-          	:constraints ((:primary-key "pk_book" :columns ("id"))
+			:constraints ((:primary-key "pk_book" :columns ("id"))
 					      (:unique-key "pk_book_title" :columns ("title"))))
   
 		(:table "author"
-          	:columns (("id" :datatype +serial+)
+			:columns (("id" :datatype +serial+)
                 	  ("firstname" :datatype +smallname+)
                       ("lastname" :datatype +smallname+))
-          	:constraints ((:primary-key "pk_author" :columns ("id")))))
+			:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
 	
 *	Method **use-schema** ((*name* string))
