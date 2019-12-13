@@ -118,6 +118,7 @@ d mine.
 
 	**use-schema** creates the specified tables in the named schema on the database. 
 	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
+	**use-schema** also creates a [tuple class](tbd) for each table in the schema. 
 
 *	Function **get-schema-by-name** (name)
 
@@ -147,8 +148,26 @@ d mine.
 
 *	Function **make-primary-key** (&key *schema* *name* *columns*)
 
+	Primary keys are created INITIALLY IMMEDIATE.
+
 *	Function **make-unique-key** (&key *schema* *name* *columns*)
 
 *	Function **make-foreign-key** (&key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict))	
 
 	Foreign keys are currently created as INITIALLY DEFERRED
+	
+## Data Manipulation
+
+*	Macro **?select** (*select-list* &key (*into* nil) *appending* *from* *where* *groupby* *having* (*lock-mode* :none) (*nowait* nil))
+
+	**Example**
+	```
+        (?select (cons 'entity_id (mapcar #'name (entity-fields target-entity)))
+                 :from (?inner-join (get-association-table-name source-entity element)
+                                    (entity-table-name target-entity)
+                                    :on (?= 'target_id 'entity_id))
+                 :lock-mode lock-mode
+                 :nowait (mode<= :share lock-mode))
+	```
+
+* 	Function **?insert-into** (*table*  &key *columns* *values*) 
