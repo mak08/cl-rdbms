@@ -84,8 +84,35 @@ d mine.
               (?select '* :from 'test))))
 ```
 
-## Notes
+## Data Definition
 
+### Macros
+
+*	Macro **defschema** (*name* &rest *definitions*)
+
+This macro provides an interface for defining a database schema in one go.
+
+**Example**
+
+```
+(defschema "example"
+  (:table "book"
+          :columns (("id" :datatype +serial+)
+                    ("title" :datatype +text+)
+                    ("author_id"  :datatype +int+)
+                    ("status" :datatype +int+))
+          :constraints ((:primary-key "pk_book" :columns ("id"))
+                        (:unique-key "pk_book_title" :columns ("title"))))
+  
+  (:table "author"
+          :columns (("id" :datatype +serial+)
+                    ("firstname" :datatype +smallname+)
+                    ("lastname" :datatype +smallname+))
+          :constraints ((:primary-key "pk_author" :columns ("id")))))
+```
+*  Macro **deftable** (*name* &key *schema* *columns* *constraints*)
+
+Provides an interface to define a table including table constraints and columns with datatype and columns constraints.
 
 ### Table definition
 
