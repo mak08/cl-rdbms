@@ -100,16 +100,15 @@ d mine.
 	(defschema "example"
 		(:table "book"
 			:columns (("id" :datatype +serial+)
-					  ("title" :datatype +text+)
+				  ("title" :datatype +text+)
                       ("author_id"  :datatype +int+)
                       ("status" :datatype +int+))
 			:constraints ((:primary-key "pk_book" :columns ("id"))
-					      (:unique-key "pk_book_title" :columns ("title"))))
-  
+				      (:unique-key "pk_book_title" :columns ("title"))))
 		(:table "author"
 			:columns (("id" :datatype +serial+)
-                	  ("firstname" :datatype +smallname+)
-                      ("lastname" :datatype +smallname+))
+                		  ("firstname" :datatype +smallname+)
+				  ("lastname" :datatype +smallname+))
 			:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
 	
