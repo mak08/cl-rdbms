@@ -106,7 +106,7 @@ d mine.
           	:constraints ((:primary-key "pk_book" :columns ("id"))
 					      (:unique-key "pk_book_title" :columns ("title"))))
   
-  	(:table "author"
+		(:table "author"
           	:columns (("id" :datatype +serial+)
                 	  ("firstname" :datatype +smallname+)
                       ("lastname" :datatype +smallname+))
