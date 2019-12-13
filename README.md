@@ -117,6 +117,9 @@ d mine.
 
 *	Method **use-schema** ((*schema* schema))
 
+	**use-schema** creates the specified tables in the named schema on the database. 
+	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
+
 *	Function **get-schema-by-name** (name)
 
 
