@@ -101,8 +101,8 @@ d mine.
 		(:table "book"
 			:columns (("id" :datatype +serial+)
 				  ("title" :datatype +text+)
-                      ("author_id"  :datatype +int+)
-                      ("status" :datatype +int+))
+				  ("author_id"  :datatype +int+)
+				  ("status" :datatype +int+))
 			:constraints ((:primary-key "pk_book" :columns ("id"))
 				      (:unique-key "pk_book_title" :columns ("title"))))
 		(:table "author"
