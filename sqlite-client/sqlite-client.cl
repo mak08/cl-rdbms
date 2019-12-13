@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-10 21:44:44>
+;;; Last Modified <michael 2019-12-12 22:58:42>
 
 (in-package "SQLITE-CLIENT")
 
@@ -61,9 +61,14 @@
   ((database :accessor database :initarg :database)
    (conn :accessor conn :initarg :conn)))
 
-(defmacro with-open-connection ((connection database) &body forms)
+(defmacro with-open-connection ((connection database &key (if-does-not-exist :fail)) &body forms)
   "Provides a new connection"
-  `(let ((,connection
+  `(progn
+     (ecase ,if-does-not-exist ((:fail :create)))
+     (when (and (eq ,if-does-not-exist :fail)
+                (not (probe-file ,database)))
+       (error "Database ~a does not exist." ,database))
+     (let ((,connection
           (%connect% ,database))
          (values))
      (unwind-protect
@@ -71,10 +76,10 @@
                 (multiple-value-list 
                  (progn ,@forms)))
        (%disconnect% ,connection))
-     (values-list values)))
+     (values-list values))))
 
-(defmacro with-current-connection ((connection database) &body forms)
-  `(with-open-connection (,connection ,database)
+(defmacro with-current-connection ((connection database &key (if-does-not-exist :fail)) &body forms)
+  `(with-open-connection (,connection ,database :if-does-not-exist ,if-does-not-exist)
      (with-connection (,connection)
        ,@forms)))
 
@@ -90,10 +95,28 @@
 ;;; Implementation
 
 (defun %connect% (database)
-  (let ((db (sqlite3-open database)))
-    (make-instance 'sqlite-connection
+  (let* ((db (sqlite3-open database))
+         (conn (make-instance 'sqlite-connection
                    :database database
                    :conn db)))
+    ;; Create the __schema table if it does not exist.
+    (multiple-value-bind (_ rows)
+        (sql-exec conn "SELECT NAME FROM SQLITE_MASTER WHERE (NAME = '__schema')")
+      (unless rows
+        (sql-exec conn "CREATE TABLE __schema (NAME)")))
+    ;; Attach registered schemas
+    (multiple-value-bind (_ rows)
+        (sql-exec conn "SELECT NAME FROM __SCHEMA")
+      (dolist (row rows)
+        (let* ((schema (car row))
+               (directory (pathname-directory database))
+               (db-name (pathname-name database))
+               (suffix (pathname-type database))
+               (schema-path (make-pathname :directory directory
+                                           :name (format nil "~a.~a" db-name schema)
+                                           :type suffix)))
+        (sql-exec conn (format () "ATTACH '~a' AS ~a" schema-path schema)))))
+    conn))
 
 (defun %disconnect% (connection) 
  (sqlite3-close (conn connection)))
@@ -115,7 +138,13 @@
                     :while (eql row +sqlite_row+)
                     :collect (loop
                                 :for col :below n-cols
-                                :collect (sqlite3-column-text p-stmt col))))
+                                :collect (sqlite3-column-text p-stmt col))
+                    :finally (case row
+                               ((#.+sqlite_done+
+                                 +.+sqlite_ok+)
+                                )
+                               (otherwise
+                                (error (sqlite3-errstr row))))))
       (sqlite3-finalize p-stmt))))
 
 (defun fetch% (into result &key field-mapper)

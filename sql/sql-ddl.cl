@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2018-01-12 00:26:39>
+;;; Last Modified <michael 2019-12-12 22:20:31>
 
 (in-package :sql)
 
@@ -139,11 +139,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Databases
 
+(defstruct database-create-statement name owner)
+
 (defun %create-database (name owner)
-  (sql:sql-exec *current-connection* (format nil "CREATE DATABASE ~a WITH OWNER = ~a;" name owner)))
+  (sql:sql-exec *current-connection*
+                (make-database-create-statement :name name :owner owner)))
+
+(defmethod sql:sql-exec ((conn t) (statement database-create-statement))
+  (sql:sql-exec conn
+                (format nil "CREATE DATABASE ~a WITH OWNER = ~a;"
+                        (database-create-statement-name statement)
+                        (database-create-statement-owner statement))))
+
+(defstruct database-drop-statement name)
 
 (defun %drop-database (name)
-  (sql:sql-exec *current-connection* (format nil "DROP DATABASE ~a;" name)))
+  (sql:sql-exec *current-connection*
+                (make-database-drop-statement :name name)))
+
+(defmethod sql:sql-exec ((conn t) (statement database-drop-statement))
+  (sql:sql-exec conn
+                (format nil "DROP DATABASE ~a;"
+                        (database-drop-statement-name statement))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Users & Roles
@@ -246,14 +263,26 @@
              format
              headers))))
 
+(defstruct (table-drop-statement (:include sql-statement)) tabdef &key if-does-not-exist if-not-empty)
+
 (defun %drop-table (tabdef &key (if-does-not-exist :error) (if-not-empty :error))
   (sql:sql-exec
    *current-connection*
-   (format nil "DROP TABLE ~:[IF EXISTS~;~] ~:[~;~:*~a.~]~a ~:[CASCADE~;RESTRICT~]"
-           (ecase if-does-not-exist (:ignore nil) (:error t))
-           (tabdef-schema tabdef)
-           (tabdef-name tabdef)
-           (ecase if-not-empty (:force nil) (:error t)))))
+   (make-table-drop-statement :tabdef tabdef
+                              :if-does-not-exist if-does-not-exist
+                              :if-not-empty if-not-empty)))
+
+(defmethod sql:sql-exec ((connection t) (statement table-drop-statement))
+  (sql:sql-exec connection
+                (format nil "DROP TABLE ~:[IF EXISTS~;~] ~:[~;~:*~a.~]~a ~:[CASCADE~;RESTRICT~]"
+                        (ecase (table-drop-statement-if-does-not-exist statement)
+                          (:ignore nil)
+                          (:error t))
+                        (tabdef-schema (table-drop-statement-tabdef statement))
+                        (tabdef-name (table-drop-statement-tabdef statement))
+                        (ecase (table-drop-statement-if-not-empty statement)
+                          (:force nil)
+                          (:error t)))))
 
 (defun %truncate-table (tabdef &key (cascade t))
   (sql:sql-exec

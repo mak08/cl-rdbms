@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-10 21:11:09>
+;;; Last Modified <michael 2019-12-12 23:51:40>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -43,14 +43,28 @@
    ;; SQL Statements
    sql-statement
    
+   ;; Databases
+   database-create-statement ; paradoxically, this exists because of SQLite
+   database-create-statement-name
+
+   database-drop-statement
+   database-drop-statement-name
+   
    ;; Embedded SQL - DDL Entities 
    schema
    schema-create-statement
+   schema-create-statement-name
+   schema-create-statement-owner
    schema-drop-statement
    make-schema
    schema-name
    schema-tables
 
+   table-drop-statement
+   table-drop-statement-tabdef
+   table-drop-statement-if-does-not-exist
+   table-drop-statement-if-not-empty
+   
    ;; Managing schemas - not really SQL, but used in the information_schema interface
    defschema
    *schema-lib*
@@ -70,7 +84,24 @@
    create-tabdef
    table-create-statement
    table-drop-statement
+
+   primary-key
+   primary-key-name
+   primary-key-columns
    
+   unique-key
+   unique-key-name
+   unique-key-columns
+   
+   foreign-key
+   foreign-key-name
+   foreign-key-columns
+   foreign-key-referenced-table-schema
+   foreign-key-referenced-table
+   foreign-key-referenced-columns
+   foreign-key-on-delete
+   foreign-key-on-update
+
    make-tabmod
 
    make-coldef
@@ -186,6 +217,9 @@
    with-nested-transaction
    mode<=
 
+   transaction-command
+   transaction-command-isolation-level
+   
    %begin
    %commit
    %rollback
