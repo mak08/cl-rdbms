@@ -10,11 +10,9 @@ d mine.
 ```
 (in-package sqlite-client)
 
-(defparameter *examples-directory*
-  (make-pathname :directory (pathname-directory #.*load-truename*)))
+(defparameter *examples-directory* (make-pathname :directory (pathname-directory #.*load-truename*)))
 
-(defparameter *db*
-  (namestring (merge-pathnames "tables.sdb" *examples-directory*)))
+(defparameter *db* (namestring (merge-pathnames "tables.sdb" *examples-directory*)))
 
 (setf (log2:log-level "sqlite-client") log2:+info+)
 
@@ -29,15 +27,6 @@ d mine.
   (%create-table (make-tabdef :name "books" :columns '(title author))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Connect to tables.sdb, fail (do not create) if it doesn't exist.
-;;; %drop-table requires a tabdef, but the :columns need not be provided.
-
-(with-current-connection (c *db*
-                            :if-does-not-exist :fail) 
-  (%drop-table (make-tabdef :name "books")))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PRIMARY and UNIQUE keys
 
 (with-current-connection (c *db*)
@@ -45,16 +34,13 @@ d mine.
   (%drop-table (make-tabdef :name "test") :if-does-not-exist :ignore)
   
   (%create-table
-   (make-tabdef :name "test"
-                :columns (list (make-coldef :name "k"
-                                            :datatype 'text)
-                               (make-coldef :name "u"
-                                            :datatype 'text)
-                               (make-coldef :name "c" :datatype 'text))
-                
-                :constraints (list
-                              (make-primary-key :name "test_pk_k" :columns '(k))
-                              (make-unique-key :name "test_unique_u" :columns '(u)))))
+   (deftable "test"
+                :columns (("k" :datatype 'text)
+                          ("u" :datatype 'text)
+                          ("c" :datatype 'text))
+                :constraints (
+                              (:primary-key "test_pk_k" :columns '(k))
+                              (:unique-key "test_unique_u" :columns '(u)))))
 
   (ignore-errors
     (?insert-into 'test :values '("k-1" "u-1" "I succeed")))
@@ -112,13 +98,16 @@ d mine.
 			:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
 	
+*	Function **create-db-schema** (*name*)
+
+	Creates the specified tables in the named schema on the database.
+	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
+
 *	Method **use-schema** ((*name* string))
 
 *	Method **use-schema** ((*schema* schema))
 
-	**use-schema** creates the specified tables in the named schema on the database. 
-	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
-	**use-schema** also creates a [tuple class](tbd) for each table in the schema. 
+	Creates the [tuple classes](tbd) for the tables defined in the schema. 
 
 *	Function **get-schema-by-name** (name)
 
