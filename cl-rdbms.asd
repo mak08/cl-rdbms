@@ -54,14 +54,14 @@
                         :components ((:file "hdb-odbc-package")
                                      (:file "hdb-odbc")
                                      (:file "sql-serialization")))
-               (:module "datamodel"
+               (:module "edm"
                         :serial t
                         :depends-on ("sql")
                         :components ((:file "package")
-                                     (:file "lifecycle")
                                      (:file "entity")   
                                      (:file "entity-api")
                                      (:file "entity-syntax")
+                                     (:file "datamodel")
                                      (:file "eeql")))))
 
 ;;; EOF

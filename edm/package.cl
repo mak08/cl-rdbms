@@ -2,7 +2,7 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-19 23:43:23 23:43:23
-;;; Last Modified  <michael 2018-01-14 20:34:45>
+;;; Last Modified  <michael 2019-12-14 10:55:18>
 ;;; Description
 
 (defpackage "DATAMODEL"
@@ -38,7 +38,6 @@
    append-tuple
 
    ;; Schemas
-   *schema*
    create-db-schema
 
    ;; entity syntax

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-12 23:51:40>
+;;; Last Modified <michael 2019-12-13 20:36:06>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -73,6 +73,7 @@
    load-db-schema
    find-db-schema
 
+   deftable
    tabdef
    make-tabdef
    tabdef-p
