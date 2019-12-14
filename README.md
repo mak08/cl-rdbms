@@ -38,9 +38,8 @@ d mine.
                 :columns (("k" :datatype 'text)
                           ("u" :datatype 'text)
                           ("c" :datatype 'text))
-                :constraints (
-                              (:primary-key "test_pk_k" :columns '(k))
-                              (:unique-key "test_unique_u" :columns '(u)))))
+                :constraints ((:primary-key "test_pk_k" :columns (k))
+                              (:unique-key "test_unique_u" :columns (u)))))
 
   (ignore-errors
     (?insert-into 'test :values '("k-1" "u-1" "I succeed")))
