@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   Examples using SQLite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-12 00:48:32>
+;;; Last Modified <michael 2019-12-14 16:31:06>
 
 (in-package sqlite-client)
 

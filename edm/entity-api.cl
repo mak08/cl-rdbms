@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   Entity Accessors that manipulate the database 
 ;;; Author        Michael Kappert 2014
-;;; Last Modified <michael 2018-01-14 20:23:21>
+;;; Last Modified <michael 2019-12-14 15:40:47>
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Operations on entities
 ;;;
@@ -52,7 +52,7 @@
 ;;;       update the database
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
-(in-package :datamodel)
+(in-package :edm)
  
 (defvar *instances-ht*
   ;; A weak(value) hashtable for caching instances

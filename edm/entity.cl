@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author        Michael Kappert 2012
-;;; Last Modified <michael 2018-01-14 20:23:37>
+;;; Last Modified <michael 2019-12-14 15:41:01>
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Design
@@ -90,7 +90,7 @@
 ;;; add-entities <schema> <entities>
 
 
-(in-package :datamodel)
+(in-package :edm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Entities, Fields and Associations

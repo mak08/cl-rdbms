@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-13 20:36:06>
+;;; Last Modified <michael 2019-12-14 15:49:16>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -11,17 +11,18 @@
   (:shadow "UNION")
   (:export
 
-   ;; Selecting the current connection
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Database connection
+
+   ;; The following two macros are implemented and exported from backend packages:
+   ;; with-open-connection ((conn &rest args &key &allow-other-keys) &body forms)
+   ;; with-current-connection ((conn &rest args &key &allow-other-keys) &body forms)
+
+   ;; The backend packages define their own connection classes as subclasses of
    sql-connection
+
+   ;; Select current connection
    with-connection
-
-   ;; Functions for creating and terminating connections
-   ;;     with-open-connection
-   ;;     %connect
-   ;;     %disconnect
-   ;;  are provided by the backend packages
-   ;;  pg-socket, pg-client and hdb-odbc
-
 
    ;; SQL - basic interaction
    sql-exec
@@ -40,17 +41,27 @@
    userinfo-name
    userinfo-password
 
-   ;; SQL Statements
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Embedded SQL - DDL Entities 
+
+   ;; SQL Statement
    sql-statement
+
    
-   ;; Databases
+   ;; Database
    database-create-statement ; paradoxically, this exists because of SQLite
    database-create-statement-name
 
    database-drop-statement
    database-drop-statement-name
    
-   ;; Embedded SQL - DDL Entities 
+   ;; Schema
+   defschema
+   get-schema-by-name
+   create-db-schema
+   load-db-schema
+   find-db-schema
+
    schema
    schema-create-statement
    schema-create-statement-name
@@ -59,21 +70,17 @@
    make-schema
    schema-name
    schema-tables
+   
+   ;; Table
+   deftable
+   create-db-table
 
    table-drop-statement
    table-drop-statement-tabdef
    table-drop-statement-if-does-not-exist
    table-drop-statement-if-not-empty
-   
-   ;; Managing schemas - not really SQL, but used in the information_schema interface
-   defschema
-   *schema-lib*
-   use-schema
-   get-schema-by-name
-   load-db-schema
-   find-db-schema
 
-   deftable
+
    tabdef
    make-tabdef
    tabdef-p
@@ -86,23 +93,7 @@
    table-create-statement
    table-drop-statement
 
-   primary-key
-   primary-key-name
-   primary-key-columns
    
-   unique-key
-   unique-key-name
-   unique-key-columns
-   
-   foreign-key
-   foreign-key-name
-   foreign-key-columns
-   foreign-key-referenced-table-schema
-   foreign-key-referenced-table
-   foreign-key-referenced-columns
-   foreign-key-on-delete
-   foreign-key-on-update
-
    make-tabmod
 
    make-coldef
@@ -121,25 +112,31 @@
    tabcon-primary-key
    
    make-primary-key
+   primary-key
    primary-key-p
    primary-key-name
    primary-key-columns
            
    make-unique-key
+   unique-key
    unique-key-p
    unique-key-name
    unique-key-columns
            
    make-foreign-key
+   foreign-key
    foreign-key-p
    foreign-key-name
    foreign-key-columns
+   foreign-key-referenced-table-schema
    foreign-key-referenced-table
    foreign-key-referenced-columns
    foreign-key-on-delete
    foreign-key-on-update
 
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Embedded SQL - DML
+   
    sql-query
    make-sql-query
    sql-query-sellist

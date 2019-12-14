@@ -2,43 +2,34 @@
 ;;; Author         Michael Kappert
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; Created        2011-10-19 23:43:23 23:43:23
-;;; Last Modified  <michael 2019-12-14 10:55:18>
+;;; Last Modified  <michael 2019-12-14 15:39:01>
 ;;; Description
 
-(defpackage "DATAMODEL"
+(defpackage "EDM"
   (:use "COMMON-LISP"
         "SQL"
         "RDPARSE"
         ;; CLOS
         #+:clisp "CLOS"
         #+:sbcl "SB-MOP"
-        #+:ccl "CCL"
-        ;; libpq 
-        #+:unix "PG-CLIENT"
-        ;; GTK UI 
-        #+:gir "GIR"
-        #+:gtk+ "GTK+")
+        #+:ccl "CCL")
 
   (:shadow "DATE")
   
   (:export
 
-   ;; Lifecycle
+   ;; "Lifecycle"
    update-schema
    backup
    restore
    redeploy
-
-   ;; ?
-   with-open-connection
-   with-connection
 
    ;; "Relational Objects"
    create-transient-table
    append-tuple
 
    ;; Schemas
-   create-db-schema
+   use-schema
 
    ;; entity syntax
    *sql-readtable*

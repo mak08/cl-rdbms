@@ -2,9 +2,9 @@
 ;;; Description    "Embedded SQL"
 ;;; Copyright      (c) Michael Kappert 2011
 ;;; License
-;;; Last Modified  <michael 2018-01-14 20:34:18>
+;;; Last Modified  <michael 2019-12-14 15:41:10>
 
-(in-package :datamodel)
+(in-package :edm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-01-12 00:26:51>
+;;; Last Modified <michael 2019-12-14 13:28:59>
 
 (in-package :sql)
 
@@ -17,6 +17,7 @@
 ;;; - hdb-odbc (HANA DB, Woe32 and Woe64, libodbcHDB)
  
 (defstruct sql-statement)
+
 (defclass sql-connection () ())
 
 (defgeneric sql-exec (connection statement)

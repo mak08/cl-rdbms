@@ -1,9 +1,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    Extended Entity Query Language
 ;;; Copyright      (c) Michael Kappert 2014
-;;; Last Modified  <michael 2018-01-14 20:33:25>
+;;; Last Modified  <michael 2019-12-14 15:40:37>
 
-(in-package :datamodel)
+(in-package :edm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Extended Entity Query

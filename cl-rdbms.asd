@@ -19,6 +19,16 @@
                                      (:file "sql-tcl")
                                      (:file "sql-tuples")
                                      (:file "sql-serializer")))
+               
+               (:module "edm"
+                        :serial t
+                        :depends-on ("sql")
+                        :components ((:file "edm-package")
+                                     (:file "entity")   
+                                     (:file "entity-api")
+                                     (:file "entity-syntax")
+                                     (:file "datamodel")
+                                     (:file "eeql")))
                (:module "pg-sql"
                         :pathname "pg-sql"
                         :depends-on ("sql")
@@ -53,16 +63,7 @@
                         :serial t
                         :components ((:file "hdb-odbc-package")
                                      (:file "hdb-odbc")
-                                     (:file "sql-serialization")))
-               (:module "edm"
-                        :serial t
-                        :depends-on ("sql")
-                        :components ((:file "package")
-                                     (:file "entity")   
-                                     (:file "entity-api")
-                                     (:file "entity-syntax")
-                                     (:file "datamodel")
-                                     (:file "eeql")))))
+                                     (:file "sql-serialization")))))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
