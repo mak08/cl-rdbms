@@ -1,20 +1,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Description
+;;; Description  Low-level interface to the backend 
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-14 13:28:59>
+;;; Last Modified <michael 2019-12-15 12:49:42>
 
 (in-package :sql)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; All SQL commands are called through SQL-EXEC and SQL-QUERY, where the
-;;; sql statement is a subtype of SQL-STATEMENT. The backends provide methods on
-;;; SQL-EXEC and SQL-QUERY to serialize the statement to appropriate SQL
-;;; syntax and send it over the wire.
+;;; All SQL commands are called through SQL-EXEC or SQL-QUERY, where the
+;;; connection is a subclass of SQL-CONNECTION and the sql statement is a subtype
+;;; of SQL-STATEMENT.
+;;; The backends provide methods on SQL-EXEC, SQL-QUERY and SERIALIZE-FOR-CONNECTION
+;;; to serialize the statement to appropriate SQL syntax and take additional actions
+;;; if required.
 
 ;;; There are currently three backends:
-;;; - pg-socket (PostgreSQL/socket, OS independent)
-;;; - pg-client (PostgreSQL/libpq, linux only, slightly faster)
-;;; - hdb-odbc (HANA DB, Woe32 and Woe64, libodbcHDB)
+;;; - sqlite-client: SQLite3 via libsqlite3
+;;; - pg-client: PostgreSQL via libpq, Linux
+;;; - pg-socket: PostgreSQL via socket, OS independent
+;;; - hdb-odbc: HANA DB via libodbcHDB, Windows10
  
 (defstruct sql-statement)
 
@@ -27,7 +30,7 @@
   (:documentation "Execute an SQL SELECT statement"))
 
 (defgeneric serialize-for-connection (connection thing stream)
-  (:documentation "This function is called to serialize SQL objects into SQL fractions"))
+  (:documentation "This function is called to serialize SQL objects into SQL fragments"))
 
 (defgeneric fetch (transient-table result &key field-mapper)
   ;; Currently not used !
@@ -37,10 +40,10 @@
   (:documentation "This function is called by ?select to fetch data rows from the DB"))
 
 (defmethod sql:sql-exec ((conn t) (sql-statement sql-statement))
-  ;; The default SQL-EXEC method simply serializes the command into a string.
-  ;; Each connection type C provides a method
-  ;;   SQL-EXEC (conn C) (statement string)
-  ;; and, if necessary, specialized methods for SERIALIZE-FOR_CONNECTION.
+  ;; The default SQL-EXEC method simply serializes the command into a string
+  ;; using SERIALIZE-FOR-CONNECTION.
+  ;; Backends should specialize SERIALIZE-FOR-CONNECTION and specialize SQL-EXEC
+  ;; only if more than one SQL command needs to be issued.
   (sql:sql-exec conn
                 (with-output-to-string (s)
                   (serialize-for-connection conn sql-statement s))))

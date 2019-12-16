@@ -1,10 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-14 15:49:16>
+;;; Last Modified <michael 2019-12-16 20:37:11>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
+        "RDPARSE"
         #+:clisp "CLOS"
         #+:sbcl "SB-MOP"
         #+:ccl "CCL")
@@ -29,17 +30,6 @@
    sql-query
    fetch
    serialize-for-connection
-      
-   ;; where does this belong?
-   dbinfo
-   make-dbinfo
-   dbinfo-name
-   dbinfo-owner
-           
-   userinfo
-   make-userinfo
-   userinfo-name
-   userinfo-password
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Embedded SQL - DDL Entities 
@@ -57,8 +47,8 @@
    
    ;; Schema
    defschema
+   %create-schema
    get-schema-by-name
-   create-db-schema
    load-db-schema
    find-db-schema
 
@@ -73,25 +63,23 @@
    
    ;; Table
    deftable
-   create-db-table
+   %create-table
 
-   table-drop-statement
-   table-drop-statement-tabdef
-   table-drop-statement-if-does-not-exist
-   table-drop-statement-if-not-empty
-
-
-   tabdef
+   create-tabdef
    make-tabdef
+   tabdef
    tabdef-p
    copy-tabdef
    tabdef-schema
    tabdef-name
    tabdef-columns
    tabdef-constraints
-   create-tabdef
+
    table-create-statement
    table-drop-statement
+   table-drop-statement-tabdef
+   table-drop-statement-if-does-not-exist
+   table-drop-statement-if-not-empty
 
    
    make-tabmod

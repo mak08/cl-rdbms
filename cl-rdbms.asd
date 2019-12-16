@@ -18,7 +18,8 @@
                                      (:file "sql-dml")
                                      (:file "sql-tcl")
                                      (:file "sql-tuples")
-                                     (:file "sql-serializer")))
+                                     (:file "sql-serializer")
+                                     (:file "sql-api")))
                
                (:module "edm"
                         :serial t

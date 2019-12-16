@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   Create, Alter, Drop table
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-13 00:03:30>
+;;; Last Modified <michael 2019-12-16 20:18:59>
 
 (in-package sqlite-client)
 
@@ -31,6 +31,32 @@
                             :if-does-not-exist :fail) 
   (%drop-table (make-tabdef :name "books")))
 
+(with-current-connection (c *db*)
+  
+  (%drop-table (make-tabdef :name "root") :if-does-not-exist :ignore)
+  (%drop-table (make-tabdef :name "child") :if-does-not-exist :ignore)
+  
+  (%create-table
+   (make-tabdef :name "root"
+                :columns (list (make-coldef :name "k"
+                                            :datatype 'text)
+                               (make-coldef :name "u"
+                                            :datatype 'text)
+                               (make-coldef :name "c" :datatype 'text))
+                
+                :constraints (list
+                              (make-primary-key :name "test_pk_k" :columns '(k))
+                              (make-unique-key :name "test_unique_u" :columns '(u)))))
+  (%create-table
+   (make-tabdef :name "child"
+                :columns (list (make-coldef :name "k"
+                                            :datatype 'text)
+                               (make-coldef :name "u"
+                                            :datatype 'text)
+                               (make-coldef :name "c" :datatype 'text))
+                
+                :constraints (list
+                              (make-foreign-key :name "test_pk_k" :columns '(k) :referenced-table "root" :referenced-columns '(k))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PRIMARY and UNIQUE keys
@@ -52,33 +78,44 @@
                               (make-unique-key :name "test_unique_u" :columns '(u)))))
 
   (ignore-errors
-    (?insert-into 'test :values '("k-1" "u-1" "I succeed")))
+    (?insert-into 'test :values '("k-11" "u-11" "I succeed")))
   (ignore-errors
-    (?insert-into 'test :values '("k-1" "u-2" "I fail")))
+    (?insert-into 'test :values '("k-11" "u-12" "I fail")))
   (ignore-errors
-    (?insert-into 'test :values '("k-2" "u-3" "I succeed")))
+    (?insert-into 'test :values '("k-12" "u-13" "I succeed")))
   (ignore-errors
-    (?insert-into 'test :values '("k-3" "u-3" "I fail")))
+    (?insert-into 'test :values '("k-13" "u-13" "I fail")))
   ;; Only the 'I succeed' rows should be inserted
-  (log2:info "Result: ~a"
-             (multiple-value-list
-              (?select '* :from 'test)))
-
-  (with-transaction ()
-    (ignore-errors
-      (?insert-into 'test :values '("k-1" "u-1" "TX I succeed")))
-    (ignore-errors
-      (?insert-into 'test :values '("k-1" "u-2" "TX I fail")))
-    (ignore-errors
-      (?insert-into 'test :values '("k-2" "u-3" "TX I succeed")))
-    (ignore-errors
-      (?insert-into 'test :values '("k-3" "u-3" "TX I fail"))))
-  ;; No rows should be inserted
   (log2:info "Result: ~a"
              (multiple-value-list
               (?select '* :from 'test))))
 
 
+(with-current-connection (c *db*)
+  
+  (%drop-table (make-tabdef :name "test") :if-does-not-exist :ignore)
+  
+  (%create-table
+   (deftable "test"
+                :columns (("k" :datatype 'text)
+                          ("u" :datatype 'text)
+                          ("c" :datatype 'text))
+                :constraints (
+                              (:primary-key "test_pk_k" :columns (k))
+                              (:unique-key "test_unique_u" :columns (u)))))
+
+
+  (with-transaction ()
+    (?insert-into 'test :values '("k-21" "u-21" "TX I succeed"))
+    (?insert-into 'test :values '("k-21" "u-22" "TX I fail"))
+    (?insert-into 'test :values '("k-22" "u-23" "TX I succeed"))
+    (?insert-into 'test :values '("k-23" "u-23" "TX I fail"))))
+
+(with-current-connection (c *db*)
+  ;; No rows should be inserted
+  (log2:info "Result: ~a"
+             (multiple-value-list
+              (?select '* :from 'test))))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2019-12-12 22:20:31>
+;;; Last Modified <michael 2019-12-15 17:10:35>
 
 (in-package :sql)
 
@@ -9,7 +9,21 @@
 ;;; SQL Commands
 ;;;    http://www.postgresql.org/docs/current/static/sql-commands.html
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Schema
+
+;;; A schema is a collection of db table definitions, not a namespace.
+;;; The schema is used in two situations:
+;;; - When building the application, the types derived from the schema must
+;;;   be created/imported.
+;;; - When deploying the application, the corresponding DB tables must be
+;;;   created
+
 (defstruct schema name owner roles tables)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Role
 
 (defstruct role name
            (superuser nil)
@@ -27,6 +41,10 @@
            (members nil)
            (admin nil))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Table definition
+
+
 (defstruct (ddl-table-cmd (:include sql-statement)) schema name)
 
 (defstruct (alter-table-cmd (:include ddl-table-cmd))
@@ -39,8 +57,6 @@
 (defstruct (sql-drop (:include ddl-table-cmd))
   cascade)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Table definition
 
 (defstruct tabdef schema name columns constraints)
 
@@ -103,18 +119,16 @@
 
 (defstruct schema-create-statement schema authorization tables)
 
-(defun %create-schema (owner &key (name owner) (tabdefs)) 
+(defun %create-schema (name &key (owner name) (tabdefs)) 
   (sql:sql-exec
    *current-connection*
    (make-schema-create-statement :schema name :authorization owner :tables tabdefs)))
 
 (defmethod sql:sql-exec ((conn t) (statement schema-create-statement))
   (sql:sql-exec conn
-                (with-output-to-string (s)
-                  (format s "CREATE SCHEMA ~a AUTHORIZATION ~a"
-                          (schema-create-statement-schema statement)
-                          (schema-create-statement-authorization statement))
-                  (!{} conn (schema-create-statement-tables statement) s))))
+                (format nil "CREATE SCHEMA ~a AUTHORIZATION ~a"
+                        (schema-create-statement-schema statement)
+                        (schema-create-statement-authorization statement))))
 
 (defstruct schema-drop-statement schema if-does-not-exist if-not-empty)
 

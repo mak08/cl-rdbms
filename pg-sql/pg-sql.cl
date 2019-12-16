@@ -2,15 +2,19 @@
 ;;; Description
 ;;; Copyright      (c) michael 2012
 ;;; License
-;;; Last Modified  <michael 2018-01-12 00:56:11>
+;;; Last Modified  <michael 2019-12-14 20:28:57>
 
 (in-package :pg-sql)
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PostgreSQL specific definitions
- 
-(defvar *table_name_length* 63)
- 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Data Types
+
+(defstruct dbinfo name owner)
+(defstruct userinfo name password)
+
 (defclass postgres-connection (sql-connection)
   ())
 

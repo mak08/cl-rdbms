@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2018-03-15 22:19:55>
+;;; Last Modified <michael 2019-12-16 20:31:21>
 
 (in-package :sql)
 
@@ -77,7 +77,7 @@
           (unique-key-columns thing)))
 
 (defmethod serialize-for-connection ((connection t) (thing foreign-key) stream)
-  (format stream "CONSTRAINT ~a FOREIGN KEY (~{~a~^, ~}) REFERENCES ~a.~a(~{~a~^, ~}) ON DELETE ~a ON UPDATE ~a INITIALLY DEFERRED"
+  (format stream "CONSTRAINT ~a FOREIGN KEY (~{~a~^, ~}) REFERENCES ~:[~;~:*~a.~]~a(~{~a~^, ~}) ON DELETE ~a ON UPDATE ~a DEFERRABLE INITIALLY DEFERRED"
           (foreign-key-name thing)
           (foreign-key-columns thing)
           (foreign-key-referenced-table-schema thing)

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   SQLite specific DDL statements 
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-13 01:22:27>
+;;; Last Modified <michael 2019-12-16 20:31:35>
 
 (in-package :sqlite-client)
 
@@ -75,21 +75,6 @@
           (unique-key-name thing)
           (unique-key-columns thing)))
 
-(defmethod sql:serialize-for-connection ((connection sqlite-connection) (thing foreign-key) stream)
-  (format stream "CONSTRAINT ~a FOREIGN KEY (~{~a~^, ~}) REFERENCES ~a.~a(~{~a~^, ~}) ON DELETE ~a ON UPDATE ~a DEFERRABLE INITIALLY DEFERRED"
-          (foreign-key-name thing)
-          (foreign-key-columns thing)
-          (foreign-key-referenced-table-schema thing)
-          (foreign-key-referenced-table thing)
-          (foreign-key-referenced-columns thing)
-          (ecase (foreign-key-on-delete thing)
-            ((nil) "NO ACTION")
-            (:cascade "CASCADE")
-            (:restrict "RESTRICT"))
-          (ecase (foreign-key-on-update thing)
-            ((nil) "NO ACTION")
-            (:cascade "CASCADE")
-            (:restrict "RESTRICT"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Type mapping for SQLite

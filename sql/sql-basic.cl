@@ -1,17 +1,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   
 ;;; Copyright      (c) Michael Kappert 2011
-;;; Last Modified  <michael 2019-12-10 21:50:54>
+;;; Last Modified  <michael 2019-12-14 20:29:52>
 
 (in-package :sql)
 
-(defparameter *table_name_length* 63)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Data Types
+;;; Limits
 
-(defstruct dbinfo name owner)
-(defstruct userinfo name password)
+(defparameter *table_name_length* 63)  ;; PostgreSQL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DB Connections - dynamic scoping
