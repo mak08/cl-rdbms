@@ -19,6 +19,7 @@
                                      (:file "sql-tcl")
                                      (:file "sql-tuples")
                                      (:file "sql-serializer")
+                                     (:file "sql-parser")
                                      (:file "sql-api")))
                
                (:module "edm"
