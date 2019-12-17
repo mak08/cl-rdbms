@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    High-level SQL API
 ;;; Author         Michael Kappert 2013
-;;; Last Modified  <michael 2019-12-16 18:05:34>
+;;; Last Modified  <michael 2019-12-17 22:53:48>
 
 (in-package :sql)
 
@@ -111,7 +111,7 @@
 (defun update-schema (schema user-name &key (redeploy nil))
   (with-transaction ()
     (let* ((old-schema
-            (load-db-schema (schema-name schema))))
+            (load-schema *current-connection* (schema-name schema))))
       
       (cond
         ((null old-schema)

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description  Low-level interface to the backend 
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-15 12:49:42>
+;;; Last Modified <michael 2019-12-17 22:53:20>
 
 (in-package :sql)
 
@@ -47,6 +47,9 @@
   (sql:sql-exec conn
                 (with-output-to-string (s)
                   (serialize-for-connection conn sql-statement s))))
+
+(defgeneric load-schema (connection name)
+  (:documentation "Load a schema definition from the DB"))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

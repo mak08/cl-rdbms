@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-16 20:37:11>
+;;; Last Modified <michael 2019-12-17 23:10:15>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -13,7 +13,7 @@
   (:export
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Database connection
+   ;; Backend integration
 
    ;; The following two macros are implemented and exported from backend packages:
    ;; with-open-connection ((conn &rest args &key &allow-other-keys) &body forms)
@@ -25,21 +25,32 @@
    ;; Select current connection
    with-connection
 
-   ;; SQL - basic interaction
+   ;; SQL - basic interaction.
+   ;; The backends define methods for their own connection class.
    sql-exec
    sql-query
    fetch
    serialize-for-connection
 
+   ;; Retrieving metadata from the DB
+   ;; The backends define methods for their own connection class.
+   load-schema
+
+   
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Embedded SQL - DDL Entities 
 
    ;; SQL Statement
+
+   ;; The parent struct of all SQL statements. Many DDL methods simply construct
+   ;; an SQL string and pass it it sql-exec%. Instead, an sql-statement should be
+   ;; constructed (a proper subtype may need to be defined first). This way,
+   ;; backends can customize the SQL string.
+   
    sql-statement
 
-   
    ;; Database
-   database-create-statement ; paradoxically, this exists because of SQLite
+   database-create-statement
    database-create-statement-name
 
    database-drop-statement
@@ -49,7 +60,6 @@
    defschema
    %create-schema
    get-schema-by-name
-   load-db-schema
    find-db-schema
 
    schema
@@ -280,6 +290,9 @@
 
    ;; UUIDs
    create-uuid
+
+   ;; Parsing SQL
+   parse-table-definition
    
    ;; Internal use
    !{}

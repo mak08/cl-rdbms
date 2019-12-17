@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   SQLite specific DDL statements 
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-16 20:31:35>
+;;; Last Modified <michael 2019-12-17 23:29:13>
 
 (in-package :sqlite-client)
 
@@ -36,6 +36,28 @@
                          (with-output-to-string (s)
                            (format s "ATTACH '~a' AS ~a" schema-db schema-name)
                            (!{} conn (schema-create-statement-tables statement) s)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Loading metadata
+;;;
+;;; SQLite stores CREATE TABLE statements in a special table SQLITE_MASTER.
+
+(defmethod load-schema ((connection sqlite-connection) (schema string))
+  (let ((schema-table
+         (cond ((string= schema "")
+                'sqlite_master)
+               (t
+                (make-symbol (format nil "~a.sqlite_master" schema))))))
+    (with-connection (connection)
+      (multiple-value-bind (columns rows)
+          (?select 'sql
+                   :from schema-table
+                   :where (?and (?= 'type "table")
+                                (?not (?= 'name "__schema"))))
+        (make-schema :name schema
+                     :tables (loop
+                                :for (sql) :in rows
+                                :collect (parse-table-definition sql)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DROP TABLE
