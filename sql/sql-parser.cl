@@ -1,26 +1,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael Kappert 2019
-;;; Last Modified <michael 2019-12-17 00:46:33>
+;;; Last Modified <michael 2019-12-17 19:09:30>
 
 (in-package :sql)
 
 
 (defun _table-definition (symbol tree level)
-  (destructuring-bind (crt tmp tbl exist schema name po firstcol cols-and-constraints cp)
+  (destructuring-bind (crt tmp tbl exist schema name po columns constraints cp)
       tree
-    (let ((coldefs)
-          (constraints))
-      (dolist (def cols-and-constraints)
-        (typecase (cadr def)
-          (coldef
-           (push (cadr def) coldefs))
-          (tabcon
-           (push (cadr def) constraints))))
-      (make-tabdef :schema (when schema (token-value schema))
-                   :name (token-value name)
-                   :columns (cons firstcol coldefs)
-                   :constraints constraints))))
+    (make-tabdef :schema (when schema (token-value schema))
+                 :name (token-value name)
+                 :columns (cons (car columns)
+                                (loop :for col :in (cadr columns) :collect (cadr col)))
+                 :constraints (loop :for con :in constraints :collect (cadr con)))))
 
 (defun _column-def (symbol tree level)
   (destructuring-bind (name type-name colcons)
@@ -56,24 +49,22 @@
 (defun _type-name (symbol tree level)
   (destructuring-bind (names params)
       tree
-    (token-value (first names))))
+    (cond ((first names)
+           (token-value (first names)))
+          (t
+           "TEXT"))))
 
 (defparser parse-table-definition
-    :tokens ((__name (:seq :letter (:rep (:alt :letter :digit "_"))))
-             (__signed-number (:seq (:opt (:alt "+" "-"))) :numeric))
+    :reserved-keywords t
+    :tokens ((__name (:seq (:alt "_" :letter) (:rep (:alt :letter :digit "_"))))
+             (__signed-number (:seq (:opt (:alt "+" "-")) :numeric)))
     :rules ((_table-definition
              (:seq "CREATE" (:opt (:alt "TEMP" "TEMPORARY"))
                    "TABLE" (:opt (:seq "IF" "NOT" "EXISTS"))
                    (:opt (:seq __name ".")) __name
                    "("
-                   _column-def
-                   ;; This grammar allows mixing columns and constraints while
-                   ;; in SQL the column definitions must come before the constraints.
-                   ;; However, the 'natural' grammar gets stuck attempting to parse
-                   ;; constraints as columns. It is unclear why it does not backtrack.
-                   (:rep (:alt 
-                          (:seq "," _table-constraint)
-                          (:seq "," _column-def)))
+                   (:seq _column-def (:rep (:seq "," _column-def)))
+                   (:rep (:seq "," _table-constraint))
                    ")"))
             (_column-def
              (:seq __name (:opt _type-name) (:rep _column-constraint)))
