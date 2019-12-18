@@ -65,9 +65,19 @@ d mine.
 
 ## DB Connection
 
-*	Macro **with-open-connection**
+*	Macro **with-connection** (*conn-var*) &body *forms*
 
-*	Macro **with-current-connection**
+	Binds **\*current-connection\*** to *conn-var*.
+
+The following two macros are exported from each client package, 
+currently **PG-CLIENT**, **SQLITE-CLIENT** and **HDB-ODBC**. 
+Each version provides its own set of keyword arguments for passing the required connection parameters.
+
+*	Macro **with-open-connection** (*conn-var* *db-name* &key &allow-other-keys) &body *forms*
+
+	Opens a connection to database *db-name* and bind *conn-var* to it.
+
+*	Macro **with-current-connection** (*conn-var* *db-name* &key &allow-other-keys) &body *forms*
 
 	Like **with-open-connection** but in addition, it binds **\*current-connection\***
 
@@ -99,56 +109,56 @@ d mine.
 			:constraints ((:primary-key "pk_author" :columns ("id")))))
 	```
 	
-*	Function **create-db-schema** (*name*)
+*	Function **create-db-schema** *name*
 
 	Creates the specified tables in the named schema on the database.
 	In SQLite, schemas are mapped to [ATTACHed](https://www.sqlite.org/lang_attach.html) databases.
 
-*	Method **use-schema** ((*name* string))
+*	Method **use-schema** (*name* string)
 
-*	Method **use-schema** ((*schema* schema))
+*	Method **use-schema** (*schema* schema)
 
 	Creates the [tuple classes](tbd) for the tables defined in the schema. 
 
-*	Function **get-schema-by-name** (name)
+*	Function **get-schema-by-name** *name*
 
 
 ### Tables
 
-*	Macro **deftable** (*name* &key *schema* *columns* *constraints*)
+*	Macro **deftable** *name* &key *schema* *columns* *constraints*
 
 	This macro provides an interface to define a table including table constraints and columns with datatype and columns constraints.
 	The table definition is not executed by the macro itself. Call **%create-table** to create the table on the database.
 
-*	Function **%drop-table** (*tabdef* &key (*if-does-not-exist* :error) (*if-not-empty* :error))
+*	Function **%drop-table** *tabdef* &key (*if-does-not-exist* :error) (*if-not-empty* :error)
 
 	Drop the table specified in *tabdef*. Only the tabdef name and schema need to be provided.
 
-*	Function **%create-table** (*tabdef*)
+*	Function **%create-table** *tabdef*
 
 	Create a table with the properties specified in *tabdef*
 
-*	Function **create-tabdef** (&key *schema* *name* *columns* *constraints*)
+*	Function **create-tabdef** &key *schema* *name* *columns* *constraints*
 
-*	Function **make-coldef** (&key *name* *datatype* *default-value* *collation* *constraint*)
+*	Function **make-coldef** &key *name* *datatype* *default-value* *collation* *constraint*
 
-*	Function **make-colcon** (&key *label* *notnull* *check* *default* *unique* *references*)
+*	Function **make-colcon** &key *label* *notnull* *check* *default* *unique* *references*
 
-*	Function **make-colref** (&key *table* *column* *matchtype* *on-delete* *on-update*)
+*	Function **make-colref** &key *table* *column* *matchtype* *on-delete* *on-update*
 
-*	Function **make-primary-key** (&key *schema* *name* *columns*)
+*	Function **make-primary-key** &key *schema* *name* *columns*
 
 	Primary keys are created INITIALLY IMMEDIATE.
 
-*	Function **make-unique-key** (&key *schema* *name* *columns*)
+*	Function **make-unique-key** &key *schema* *name* *columns*
 
-*	Function **make-foreign-key** (&key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict))	
+*	Function **make-foreign-key** &key *schema* *name* *columns* *referenced-table-schema* *referenced-table* (*on-delete* :restrict) (*on-update* :restrict)
 
 	Foreign keys are currently created as INITIALLY DEFERRED
 	
 ## Data Manipulation
 
-*	Macro **?select** (*select-list* &key (*into* nil) *appending* *from* *where* *groupby* *having* (*lock-mode* :none) (*nowait* nil))
+*	Macro **?select** *select-list* &key (*into* nil) *appending* *from* *where* *groupby* *having* (*lock-mode* :none) (*nowait* nil)
 
 	**Example**
 	```
@@ -160,4 +170,4 @@ d mine.
                  :nowait (mode<= :share lock-mode))
 	```
 
-* 	Function **?insert-into** (*table*  &key *columns* *values*) 
+* 	Function **?insert-into** *table*  &key *columns* *values* 
