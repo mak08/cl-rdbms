@@ -21,8 +21,8 @@ d mine.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Connect to tables.sdb (create if does not exist), and create table TEST
 ;;; The WITH-CURRENT-CONNECTION macro opens a DB connection, and binds *CURRENT-CONNECTION* to it.
-;;; It also binds the provided variable (C in this case) to the connection.
-;;; All the 'embedded SQL' functions (names beginning with % and ?) use *current-connection*.
+;;; It also binds the provided variable to the connection.
+;;; All the 'embedded SQL' functions (names beginning with % and ?) use *CURRENT-CONNECTION*.
 
 (with-current-connection (c *db* :if-does-not-exist :create)
   
@@ -62,6 +62,14 @@ d mine.
              (multiple-value-list
               (?select '* :from 'test))))
 ```
+
+## DB Connection
+
+*	Macro **with-open-connection**
+
+*	Macro **with-current-connection**
+
+	Like **with-open-connection** but in addition, it binds **\*current-connection\***
 
 ## Data Definition
 
