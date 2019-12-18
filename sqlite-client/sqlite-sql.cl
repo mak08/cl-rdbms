@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   SQLite specific DDL statements 
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-17 23:29:13>
+;;; Last Modified <michael 2019-12-18 01:12:44>
 
 (in-package :sqlite-client)
 
@@ -14,7 +14,7 @@
 ;;; CREATE SCHEMA
 ;;;
 ;;; SQLite does not have CREATE SCHEMA, but attached DBs look somewhat like schemas.
-;;; Schemas are always create on disk and not work in-memory.
+;;; Schemas are always create on disk.
 ;;; We keep track of attached schemas in a special table __schema.
 ;;; ToDo: The process is not recursive. Distinguish between 'main db files' and 'schema db files'.
 ;;; For example, opening a schema db file directly would create a __schema table in it (see CONNECT).
@@ -49,15 +49,16 @@
                (t
                 (make-symbol (format nil "~a.sqlite_master" schema))))))
     (with-connection (connection)
-      (multiple-value-bind (columns rows)
-          (?select 'sql
-                   :from schema-table
-                   :where (?and (?= 'type "table")
-                                (?not (?= 'name "__schema"))))
+      (let ((result
+             (?select 'sql
+                      :from schema-table
+                      :where (?and (?= 'type "table")
+                                   (?not (?= 'name "__schema")))
+                      :into '("sql"))))
         (make-schema :name schema
                      :tables (loop
-                                :for (sql) :in rows
-                                :collect (parse-table-definition sql)))))))
+                                :for row :across (tuples result)
+                                :collect (parse-table-definition (sql row))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DROP TABLE
