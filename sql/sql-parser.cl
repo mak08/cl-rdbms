@@ -1,19 +1,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael Kappert 2019
-;;; Last Modified <michael 2019-12-17 19:09:30>
+;;; Last Modified <D037165 2019-12-18 13:30:20>
 
 (in-package :sql)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Parse tree construction
 
+(eval-when (:load-toplevel :compile-toplevel :execute)
 (defun _table-definition (symbol tree level)
-  (destructuring-bind (crt tmp tbl exist schema name po columns constraints cp)
+  (destructuring-bind (crt tmp tbl exist schema name table-body)
       tree
-    (make-tabdef :schema (when schema (token-value schema))
-                 :name (token-value name)
-                 :columns (cons (car columns)
-                                (loop :for col :in (cadr columns) :collect (cadr col)))
-                 :constraints (loop :for con :in constraints :collect (cadr con)))))
+    (destructuring-bind (op columns constraints cp rowid-clause)
+        table-body
+      (make-tabdef :schema (when schema (token-value schema))
+                   :name (token-value name)
+                   :columns (cons (car columns)
+                                  (loop :for col :in (cadr columns) :collect (cadr col)))
+                   :constraints (loop :for con :in constraints :collect (cadr con))))))
 
 (defun _column-def (symbol tree level)
   (destructuring-bind (name type-name colcons)
@@ -53,6 +58,10 @@
            (token-value (first names)))
           (t
            "TEXT"))))
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Parser definition
 
 (defparser parse-table-definition
     :reserved-keywords t
@@ -62,10 +71,12 @@
              (:seq "CREATE" (:opt (:alt "TEMP" "TEMPORARY"))
                    "TABLE" (:opt (:seq "IF" "NOT" "EXISTS"))
                    (:opt (:seq __name ".")) __name
-                   "("
-                   (:seq _column-def (:rep (:seq "," _column-def)))
-                   (:rep (:seq "," _table-constraint))
-                   ")"))
+                   (:alt (:seq "("
+                               (:seq _column-def (:rep (:seq "," _column-def)))
+                               (:rep (:seq "," _table-constraint))
+                               ")"
+                               (:opt (:seq "WITHOUT" "ROWID")))
+                         (:seq "AS" _select_smt))))
             (_column-def
              (:seq __name (:opt _type-name) (:rep _column-constraint)))
             (_type-name
@@ -73,7 +84,7 @@
                    (:opt (:seq "(" __signed-number (:opt (:seq "," __signed-number)) ")"))))
             (_column-constraint
              (:seq (:opt (:seq "CONSTRAINT" __name))
-                   (:alt _primary _not-null _unique _check _default _foreign-key-clause))) 
+                   (:alt _primary _not-null _unique _check _default _collate _foreign-key-clause))) 
             (_primary
              (:seq "PRIMARY" "KEY" (:opt (:alt "ASC" "DESC")) _conflict-clause (:opt "AUTOINCREMENT")))
             (_conflict-clause
@@ -112,7 +123,8 @@
                          _check
                          (:seq "FOREIGN" "KEY" _name-list _foreign-key-clause))))
             (_expr (:opt __name))
-            (_literal (:alt :string :nuemric "TRUE" "FALSE" ))))
+            (_literal (:alt :string :nuemric "TRUE" "FALSE" ))
+            (_select_stmt (:opt __name))))
 
 ;;; EOF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
