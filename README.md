@@ -171,3 +171,27 @@ Each version provides its own set of keyword arguments for passing the required 
 	```
 
 * 	Function **?insert-into** *table*  &key *columns* *values* 
+
+
+## Notes
+
+*	When using *tuples*, column names are mapped to generic functions. 
+	Therefore, a column cannot have the same name as a Lisp function or macro.
+
+## Internals
+
+### Backend interface
+
+#### Method **serialize-for-connection**
+#### Structure **sql-statement**
+#### **sql-exec**
+#### **fetch** 
+
+### Default values
+
+*	Method (**print-object** (thing tuple) t) prints unbound tuple slots as DEFAULT 
+	but this only affects how they are printed in Lisp.
+
+*	Method **tuple-values** returns NIL for unbound slots.
+
+*	Method **sql-serialize** prints NIL as DEFAULT.
