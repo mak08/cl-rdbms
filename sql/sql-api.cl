@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    High-level SQL API
 ;;; Author         Michael Kappert 2013
-;;; Last Modified  <michael 2019-12-17 22:53:48>
+;;; Last Modified  <michael 2019-12-25 21:58:25>
 
 (in-package :sql)
 
@@ -20,7 +20,8 @@
         (constraints
           (loop :for constraint :in constraints :collect
              (destructuring-bind (&key primary-key foreign-key unique-key
-                                       columns referenced-table referenced-columns)
+                                       columns referenced-table referenced-columns
+                                       (on-update :restrict) (on-delete :cascade))
                  constraint
                (cond (primary-key
                       `(make-primary-key :name ,primary-key
@@ -31,7 +32,9 @@
                                          :columns ',columns
                                          :referenced-table-schema ,schema
                                          :referenced-table ',referenced-table
-                                         :referenced-columns ',referenced-columns))
+                                         :referenced-columns ',referenced-columns
+                                         :on-update ,on-update
+                                         :on-delete ,on-delete))
                      (unique-key
                       `(make-unique-key :name ,unique-key
                                         :columns ',columns)))))))
@@ -67,36 +70,19 @@
 ;;; create schema
 
 (defun create-schema (schema)
-  ;; At least try to clean up before attempting to create the schema
-  (%drop-schema (schema-name schema) :if-does-not-exist :ignore :if-not-empty :force)
+    ;; At least try to clean up before attempting to create the schema
+    
+    ;; not implemented in SQLite
+    ;; (%drop-schema (schema-name schema) :if-does-not-exist :ignore :if-not-empty :force)
+    
+    ;; Create schema initially empty
+    (%create-schema (schema-name schema) :if-exists :ignore)
+    
+    ;; Create tables
+    (with-transaction ()
 
-  ;; Create schema initially empty
-  (%create-schema user-name :name (schema-name schema))
-
-  ;; Create tables initially without constraints.
-  (dolist (tabdef (schema-tables schema))
-    (let ((new-tabdef (copy-tabdef tabdef)))
-      (setf (tabdef-constraints new-tabdef) nil)
-      (%create-table new-tabdef)))
-
-  ;; Constraints cannot be altered. Create constraints only for new tables.
-  ;; Create all primary keys
-  (dolist (tabdef (schema-tables schema))
-    (dolist (constraint (tabdef-constraints tabdef))
-      (when (primary-key-p constraint)
-        (%add-primary-key tabdef constraint))))
-        
-  ;; Create UNIQUE contraints
-  (dolist (tabdef (schema-tables schema))
-    (dolist (constraint (tabdef-constraints tabdef))
-      (when (unique-key-p constraint)
-        (%add-unique-key tabdef constraint))))
-
-  ;; Create all foreign keys (refer to tables and their primary keys)
-  (dolist (tabdef (schema-tables schema))
-    (dolist (constraint (tabdef-constraints tabdef))
-      (when (foreign-key-p constraint)
-        (%add-foreign-key tabdef constraint)))))
+      (dolist (tabdef (schema-tables schema))
+        (%create-table tabdef))))
 
 
 (defun wipe-schema (schema)
@@ -104,9 +90,10 @@
     (%drop-table tabdef :if-not-empty :force)))
 
 (defun clear-schema (schema)
-  (dolist (tabdef (schema-tables schema))
-    (?delete (tabdef-name tabdef))))
-
+  (with-transaction ()
+    (dolist (tabdef (schema-tables schema))
+      (?delete (tabdef-name tabdef)))))
+  
 
 (defun update-schema (schema user-name &key (redeploy nil))
   (with-transaction ()

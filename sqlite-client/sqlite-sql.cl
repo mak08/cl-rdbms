@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   SQLite specific DDL statements 
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-18 01:12:44>
+;;; Last Modified <michael 2019-12-24 01:59:05>
 
 (in-package :sqlite-client)
 
@@ -28,14 +28,31 @@
                      (make-pathname :device (pathname-device main-db)
                                     :directory (pathname-directory main-db)))))
     (cond ((probe-file schema-db)
-           (error "Schema ~a exists" schema-db))
+           (when (eq (schema-create-statement-if-exists statement) :error)
+             (error "Schema ~a exists" schema-db)))
           (t
            (sql:sql-exec conn
                          (format nil "INSERT INTO __SCHEMA (NAME) VALUES ('~a')" schema-name))
            (sql:sql-exec conn
                          (with-output-to-string (s)
-                           (format s "ATTACH '~a' AS ~a" schema-db schema-name)
-                           (!{} conn (schema-create-statement-tables statement) s)))))))
+                           (format s "ATTACH '~a' AS ~a" schema-db schema-name)))))))
+
+(defmethod sql:sql-exec ((conn sqlite-connection) (statement schema-drop-statement))
+  (let* ((main-db (database conn))
+         (db-name (pathname-name main-db))
+         (schema-name (schema-drop-statement-schema statement))
+         (schema-db (merge-pathnames 
+                     (make-pathname :name (format () "~a.~a" db-name schema-name) :type "sdb")
+                     (make-pathname :device (pathname-device main-db)
+                                    :directory (pathname-directory main-db))))
+         (schema-file (probe-file schema-db)))
+    (log2:info "Deleting schema file: ~a" schema-file)
+    (case schema-file
+      ((nil)
+       (error "Schema ~a does not exist" schema-db))
+      (otherwise
+       (?delete '__SCHEMA :where (?= 'name schema-name))
+       (delete-file schema-db)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Loading metadata
@@ -98,6 +115,24 @@
           (unique-key-name thing)
           (unique-key-columns thing)))
 
+(defmethod serialize-for-connection ((connection t) (thing foreign-key) stream)
+  (when (foreign-key-referenced-table-schema thing)
+    (log2:warning "Ignoring schema ~a in foreign key reference" (foreign-key-referenced-table-schema thing)))
+  (format stream "CONSTRAINT ~a FOREIGN KEY (~{~a~^, ~}) REFERENCES ~:[~;~:*~a.~]~a(~{~a~^, ~}) ON DELETE ~a ON UPDATE ~a DEFERRABLE INITIALLY DEFERRED"
+          (foreign-key-name thing)
+          (foreign-key-columns thing)
+          ;; SQLite does not allow cross-schema references
+          nil
+          (foreign-key-referenced-table thing)
+          (foreign-key-referenced-columns thing)
+          (ecase (foreign-key-on-delete thing)
+            ((nil) "NO ACTION")
+            (:cascade "CASCADE")
+            (:restrict "RESTRICT"))
+          (ecase (foreign-key-on-update thing)
+            ((nil) "NO ACTION")
+            (:cascade "CASCADE")
+            (:restrict "RESTRICT"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Type mapping for SQLite

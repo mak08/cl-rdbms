@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description  Low-level interface to the backend 
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-17 22:53:20>
+;;; Last Modified <michael 2020-01-02 20:41:44>
 
 (in-package :sql)
 
@@ -33,13 +33,14 @@
   (:documentation "This function is called to serialize SQL objects into SQL fragments"))
 
 (defgeneric fetch (transient-table result &key field-mapper)
-  ;; Currently not used !
   ;; #ToDo: Think about how to integrate this into ?select/sql-query.
   ;; -> for example, require sql-query to return am object of type sql-result
   ;;    (instead of (values columns rows)) and dispatch on it.
   (:documentation "This function is called by ?select to fetch data rows from the DB"))
 
-(defmethod sql:sql-exec ((conn t) (sql-statement sql-statement))
+(defgeneric output-container-for-spec (spec &key mode))
+
+(defmethod sql-exec ((conn t) (sql-statement sql-statement))
   ;; The default SQL-EXEC method simply serializes the command into a string
   ;; using SERIALIZE-FOR-CONNECTION.
   ;; Backends should specialize SERIALIZE-FOR-CONNECTION and specialize SQL-EXEC

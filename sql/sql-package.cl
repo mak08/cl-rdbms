@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-17 23:10:15>
+;;; Last Modified <michael 2020-01-09 21:08:33>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -58,6 +58,7 @@
    
    ;; Schema
    defschema
+   create-schema
    %create-schema
    get-schema-by-name
    find-db-schema
@@ -65,7 +66,9 @@
    schema
    schema-create-statement
    schema-create-statement-name
-   schema-create-statement-owner
+   schema-create-statement-authorization
+   schema-create-statement-if-exists
+   
    schema-drop-statement
    make-schema
    schema-name
@@ -84,6 +87,8 @@
    tabdef-name
    tabdef-columns
    tabdef-constraints
+   tabdef-pk-columns
+   tabdef-pk-column-p
 
    table-create-statement
    table-drop-statement
@@ -228,9 +233,10 @@
    %copy-table
    %truncate-table
 
-   ?update
    ?insert-into
    ?insert
+   ?upsert
+   ?update
    ?delete
    ?select
    ?inner-join
@@ -287,7 +293,7 @@
    timestamp
    duration
    date
-
+   
    ;; UUIDs
    create-uuid
 

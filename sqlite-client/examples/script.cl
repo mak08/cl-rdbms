@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   Examples using SQLite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2019-12-18 00:15:20>
+;;; Last Modified <michael 2019-12-18 22:18:32>
 
 (in-package sqlite-client)
 
@@ -11,9 +11,6 @@
 (defparameter *db*
   (namestring (merge-pathnames "script.sdb" *examples-directory*)))
 
-;;; logging to an Emacs buffer is too slow to log 100.000 SQL inserts.
-;;; Even logging to file more than doubles the run time.
-(setf (log2:log-level "sqlite-client") log2:+warning+)
 
 (unless (boundp '*db*)
   (defparameter *db* "/home/michael/Repository/cl-rdbms/sqlite-client/examples/script.sdb"))
@@ -31,13 +28,18 @@
 ;;; Insert 100.000 books in a transaction.
 ;;; The WITH-TRANSACTION macro accepts an :ISOLATION parameter, but the SQLite implementation ignores it.
 
-(with-current-connection (c *db*) 
-  (with-transaction ()
-    (dotimes (k 100000)
-      (?insert (list (format nil "Harry Potter ~a" k)
-                     "J K Rowling")
-               :into 'books))
-    (?select (?alias (?count '*) 'total) :from 'books)))
+;;; logging to an Emacs buffer is too slow to log 100.000 SQL inserts.
+;;; Even logging to file more than doubles the run time.
+(progn
+  (setf (log2:log-level "sqlite-client") log2:+info+)
+  (setf (log2:log-destination "sqlite-client") "sqlite.log")
+  (with-current-connection (c *db* :if-does-not-exist :create) 
+    (with-transaction ()
+      (dotimes (k 100000)
+        (?insert (list (format nil "Harry Potter ~a" k)
+                       "J K Rowling")
+                 :into 'books))
+      (?select (?alias (?count '*) 'total) :from 'books))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Create schema SCHEMA_01 and table SCHEMA_01.BOOKS 

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael Kappert 2019
-;;; Last Modified <D037165 2019-12-18 13:30:20>
+;;; Last Modified <michael 2019-12-19 17:56:59>
 
 (in-package :sql)
 
@@ -37,7 +37,13 @@
         ((string= ctype "UNIQUE")
          (make-unique-key :name name :columns (second spec)))
         ((string= ctype "FOREIGN")
-         (make-foreign-key :name name :columns (third spec)))))))
+          (destructuring-bind (symbol tree)
+              (fourth spec)
+            (make-foreign-key :name name
+                              :columns (third spec)
+                              :referenced-table (token-value (second tree))
+                              :referenced-columns (third tree))))))))
+
     
 (defun _primary (symbol tree level)
   (destructuring-bind (p k columns)

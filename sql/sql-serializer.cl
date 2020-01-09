@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2019-12-16 20:31:21>
+;;; Last Modified <michael 2020-01-09 22:19:56>
 
 (in-package :sql)
 
@@ -102,12 +102,34 @@
   (serialize-for-connection connection (sql-query-table-expression thing) stream))
 
 (defmethod serialize-for-connection ((connection t) (thing sql-insert) stream)
-  (format stream "INSERT INTO ~a " (sql-insert-table thing))
-  (@[] connection (sql-insert-columns thing) stream :prefix "(" :suffix ") ")
-  (format stream "VALUES (")
-  (serialize-for-connection connection (sql-insert-values thing) stream)
-  (format stream ")"))
+  (cond
+    ((null (sql-insert-values thing))
+     (format stream "INSERT INTO ~a DEFAULT VALUES" (sql-insert-table thing)))
+    (t
+     (format stream "INSERT INTO ~a " (sql-insert-table thing))
+     (@[] connection (sql-insert-columns thing) stream :prefix "(" :suffix ") ")
+     (format stream "VALUES (")
+     (!{} connection (sql-insert-values thing) stream)
+     (format stream ")"))))
 
+(defmethod serialize-for-connection ((connection t) (thing sql-upsert) stream)
+  (format stream "INSERT INTO ~a " (sql-upsert-table thing))
+  (@[] connection (sql-upsert-columns thing) stream :prefix "(" :suffix ") ")
+  (format stream " VALUES (")
+  (!{} connection (sql-upsert-values thing) stream)
+  (format stream ")")
+  (format stream " ON CONFLICT ")
+  (format stream "(")
+  (!{} connection  (sql-upsert-key-columns thing) stream)
+  (format stream ")")
+  (format stream " DO  ")
+  (format stream " UPDATE ")
+  (format stream " SET ")
+  (serialize-for-connection connection (sql-update-expression (sql-upsert-update thing)) stream)
+  (format stream " WHERE ")
+  (serialize-for-connection connection (sql-update-condition (sql-upsert-update thing)) stream)
+  (format stream ";"))
+  
 (defmethod serialize-for-connection ((connection t) (thing sql-update) stream)
   (format stream "UPDATE ~a SET " (sql-update-table thing))
   (serialize-for-connection connection (sql-update-expression thing) stream)
@@ -148,7 +170,7 @@
   (@[] connection (select-item-alias thing) stream :prefix " AS "))
 
 (defmethod serialize-for-connection ((connection t) (thing sql-table-expression) stream)
-  (@[] connection (sql-table-expression-from thing) stream :prefix "FROM ")
+  (@[] connection (sql-table-expression-from thing) stream :prefix " FROM ")
   (@[] connection (sql-table-expression-where thing) stream :prefix " WHERE ")
   (@[] connection (sql-table-expression-groupby thing) stream :prefix " GROUP BY ")
   (@[] connection (sql-table-expression-having thing) stream :prefix " HAVING ")
@@ -222,10 +244,11 @@
 ;; Assignment (in UPDATE)
 
 (defmethod serialize-for-connection ((connection t) (thing sql-assignment) stream)
+  (format stream " (")
   (serialize-for-connection connection (sql-assignment-colex thing) stream)
-  (format stream " = ")
-  (serialize-for-connection connection (sql-assignment-valex thing) stream))
-
+  (format stream ") = (")
+  (serialize-for-connection connection (sql-assignment-valex thing) stream)
+  (format stream ") "))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tuples for Insert
 

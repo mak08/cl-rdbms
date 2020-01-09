@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2019-12-15 17:10:35>
+;;; Last Modified <michael 2020-01-09 21:07:40>
 
 (in-package :sql)
 
@@ -58,7 +58,7 @@
   cascade)
 
 
-(defstruct tabdef schema name columns constraints)
+(defstruct tabdef schema name columns constraints %pk_columns)
 
 (defun create-tabdef (&key schema name columns constraints)
   (when (symbolp name)
@@ -71,6 +71,18 @@
                :name name
                :columns columns
                :constraints constraints))
+
+(defun tabdef-pk-columns (tabdef)
+  (or (tabdef-%pk_columns tabdef)
+      (setf  (tabdef-%pk_columns tabdef)
+             (let ((pk (find-if (lambda (c) (typep c 'primary-key)) (tabdef-constraints tabdef))))
+               (primary-key-columns pk)))))
+
+(defun tabdef-pk-column-p (tabdef column)
+  (member (symbol-name column)
+          (tabdef-pk-columns tabdef)
+          :test #'string-equal))
+
 
 ;;; Column definitions
 (defstruct coldef name datatype default-value collation constraint)
@@ -117,12 +129,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schemas
 
-(defstruct schema-create-statement schema authorization tables)
+(defstruct schema-create-statement schema authorization if-exists)
 
-(defun %create-schema (name &key (owner name) (tabdefs)) 
+(defun %create-schema (name &key authorization (if-exists :ignore))
+  (ecase if-exists ((:ignore :error)))
   (sql:sql-exec
    *current-connection*
-   (make-schema-create-statement :schema name :authorization owner :tables tabdefs)))
+   (make-schema-create-statement :schema name :authorization authorization :if-exists if-exists)))
 
 (defmethod sql:sql-exec ((conn t) (statement schema-create-statement))
   (sql:sql-exec conn

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <D037165 2018-03-16 10:19:54>
+;;; Last Modified <michael 2020-01-09 22:18:07>
  
 (in-package :sql)
  
@@ -27,10 +27,19 @@
  
 (defstruct (sql-table-statement (:include sql-statement))
   table)
-(defstruct (sql-update (:include sql-table-statement))
-  expression condition)
+
 (defstruct (sql-insert (:include sql-table-statement))
-  columns values)
+  columns
+  values)
+
+(defstruct (sql-update (:include sql-table-statement))
+  expression
+  condition)
+
+(defstruct (sql-upsert (:include sql-insert))
+  key-columns
+  update)
+
 (defstruct (sql-delete (:include sql-table-statement))
   condition)
  
@@ -105,7 +114,6 @@
                     :values values)))
 
 (defgeneric ?insert (values &key into columns))
-  
 (defmethod ?insert ((values t) &key into columns)
   (sql:sql-exec
    *current-connection*
@@ -114,8 +122,9 @@
                                  (list columns)
                                  columns)
                     :values values)))
- 
-(defun ?update (table &key set to where)
+
+(defgeneric ?update (table &key set to where)) 
+(defmethod ?update (table &key set to where)
   (sql:sql-exec
    *current-connection*
    (make-sql-update :table table
@@ -128,7 +137,7 @@
    (make-sql-delete :table table
                     :condition where)))
  
-(defmacro ?select (select-list &key (into nil) appending from where groupby having (lock-mode :none) (nowait nil))
+(defmacro ?select (select-list &key (into nil) (rows :multi)  appending from where groupby having (lock-mode :none) (nowait nil))
   (declare (ignorable appending))
   `(macrolet ((?select (select-list &key from where groupby having as)
                 `(let* ((select-list ,select-list)
@@ -163,9 +172,12 @@
                                                :having ,having
                                                :lock-mode ,lock-mode
                                                :nowait ,nowait)))
-         (if ,into
-           (fetch ,into (list columns rows))
-           (values columns rows))))))
+         (cond
+           (,into
+            (let ((container (output-container-for-spec ,into :mode ,rows)))
+              (fetch container (list columns rows))))
+           (t
+            (values columns rows)))))))
  
 (defmacro ?alias (column alias)
   `(make-select-item :colspec ,column :alias ,alias))
