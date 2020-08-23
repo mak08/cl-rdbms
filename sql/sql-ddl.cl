@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2020-01-09 21:07:40>
+;;; Last Modified <michael 2020-01-16 16:36:56>
 
 (in-package :sql)
 
@@ -21,6 +21,11 @@
 ;;;   created
 
 (defstruct schema name owner roles tables)
+
+(defmethod print-object ((thing schema) stream)
+  (format stream "<Schema ~a with ~a tables>"
+          (schema-name thing)
+          (length (schema-tables thing))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Role
@@ -58,7 +63,14 @@
   cascade)
 
 
-(defstruct tabdef schema name columns constraints %pk_columns)
+(defstruct tabdef schema name columns constraints
+           %pk_columns
+           (key-columns% (make-hash-table :test #'equalp)))
+
+(defmethod print-object ((thing tabdef) stream)
+  (format stream "<Table ~a~a>"
+          (tabdef-name thing)
+          (mapcar #'coldef-name (tabdef-columns thing))))
 
 (defun create-tabdef (&key schema name columns constraints)
   (when (symbolp name)
@@ -77,6 +89,11 @@
       (setf  (tabdef-%pk_columns tabdef)
              (let ((pk (find-if (lambda (c) (typep c 'primary-key)) (tabdef-constraints tabdef))))
                (primary-key-columns pk)))))
+
+(defun tabdef-key-columns (tabdef key-name)
+  (let ((key (find-if (lambda (c) (string= (tabcon-name c) key-name))
+                      (tabdef-constraints tabdef))))
+    (tabcon-columns key)))
 
 (defun tabdef-pk-column-p (tabdef column)
   (member (symbol-name column)

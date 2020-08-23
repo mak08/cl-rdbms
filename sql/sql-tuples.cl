@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    db interface
 ;;; Author         Michael Kappert 2011
-;;; Last Modified  <michael 2020-01-09 22:18:52>
+;;; Last Modified  <michael 2020-03-03 00:46:14>
 
 (in-package :sql)
 
@@ -118,36 +118,38 @@
                          :columns filled-columns
                          :values column-values))))
 
-;;; ToDo: UPDATE/UPSERT requires a key, but there may
-;;; be severel unique keys that could be used. 
+
 (defgeneric ?upsert (tuple &key &allow-other-keys))
 
-(defmethod ?upsert ((tuple db-tuple)
-                    &key
-                      (into (tuple-table tuple))
-                      (columns (tuple-columns tuple)))
+(defmethod ?upsert ((tuple db-tuple) &key key-name)
+  "UPSERT tuple w.r.t the specifed key. If no key is specified, the primary key is used."
   (let* ((tabdef (tabdef tuple))
-         (pk-columns (tabdef-pk-columns tabdef)))
+         (into (tuple-table tuple))
+         (columns (tuple-columns tuple))
+         (key-columns (if key-name
+                          (tabdef-key-columns tabdef key-name)
+                          (tabdef-pk-columns tabdef))))
     (loop
        :for v :in (tuple-values tuple)
        :for c :in columns
        :unless (or (null v) (eq v +default+))
-       :if (tabdef-pk-column-p tabdef c)
-       :collect v :into key-values :and :collect c :into key-columns
+       :if (member (symbol-name c) key-columns :test #'string-equal)
+       :collect v :into conflict-values :and :collect c :into conflict-columns
        :else :collect v :into attr-values :and :collect c :into attr-columns
        :finally (sql:sql-exec
                  *current-connection*
                  (make-sql-upsert :table into
-                                  :columns (append key-columns attr-columns)
-                                  :values (append key-values attr-values)
-                                  :key-columns key-columns
+                                  :columns (append conflict-columns attr-columns)
+                                  :values (append conflict-values attr-values)
+                                  :key-columns conflict-columns
                                   :update (make-sql-update :table into
                                                            :expression (make-sql-assignment :colex attr-columns
                                                                                             :valex attr-values)
-                                                           :condition (?and (loop
-                                                                           :for c :in key-columns
-                                                                           :for v :in key-values
-                                                                           :collect (?= c v)))))))))
+                                                           :condition (apply #'?and
+                                                                             (loop
+                                                                                :for c :in conflict-columns
+                                                                                :for v :in conflict-values
+                                                                                :collect (?= c v)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Creating tuple classes
@@ -279,17 +281,21 @@
                            (or (find (funcall field-mapper colsym) slots)
                                (warn "Tuple ~a has no column ~a, valid columns are ~a. Values will be discarded."
                                      tuple column slots))))))
-      (when (> num-rows 1)
-        (warn "Result has more than one rows. Excess rows will be discarded."))
-      (loop
-             :for column :in columns
-             :for colnum :below num-cols
-             :for value :in (car rows)
-             :when column
-         :do (setf (slot-value tuple column) value))
-      (values tuple
-              columns
-              num-rows))))
+      (case  num-rows
+        (0
+         (values nil columns 0))
+        (otherwise
+         (when (> num-rows 1)
+           (warn "Result has more than one rows. Excess rows will be discarded."))
+         (loop
+            :for column :in columns
+            :for colnum :below num-cols
+            :for value :in (car rows)
+            :when column
+            :do (setf (slot-value tuple column) value))
+         (values tuple
+                 columns
+                 num-rows))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 

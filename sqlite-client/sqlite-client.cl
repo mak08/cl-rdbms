@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2020-01-05 18:29:17>
+;;; Last Modified <michael 2020-05-17 00:56:29>
 
 (in-package "SQLITE-CLIENT")
 
@@ -181,13 +181,23 @@
                     :while (eql row +sqlite_row+)
                     :collect (loop
                                 :for col :below n-cols
-                                :collect (sqlite3-column-text p-stmt col))
+                                :for col-type =  (sqlite3-column-type p-stmt col)
+                                :collect (ecase col-type
+                                           (#.+sqlite_integer+
+                                            (sqlite3-column-int64 p-stmt col))
+                                           (#.+sqlite_float+
+                                            (sqlite3-column-double p-stmt col))
+                                           ((#.+sqlite_text+
+                                             #.+sqlite3_text+)
+                                            (sqlite3-column-text p-stmt col))
+                                           (#.+sqlite_null+
+                                            (sqlite3-column-text p-stmt col))))
                     :finally (case row
                                ((#.+sqlite_done+
                                  +.+sqlite_ok+)
                                 )
                                ((#.+sqlite_busy+  #.+sqlite_locked+)
-                                (error "LOCKED"))
+                                (error (make-instance 'sql-locked :statement sql-statement)))
                                (otherwise
                                 (error "sqlite error ~a: ~a"
                                        row

@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   
 ;;; Copyright      (c) Michael Kappert 2011
-;;; Last Modified  <michael 2019-12-14 20:29:52>
+;;; Last Modified  <michael 2020-05-17 01:00:42>
 
 (in-package :sql)
 
@@ -30,12 +30,31 @@
 (defgeneric ensure-tuple-class (spec))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Conditions
+
+(define-condition sql-error (error)
+  ((statement :accessor statement :initarg :statement :initform "")))
+
+(define-condition sql-locked (sql-error)
+  ()
+  (:report (lambda (condition stream)
+             (format stream "Table locked while executing ~a"
+                     (statement condition)))))
+
+(define-condition sql-other (sql-error)
+  ((error-code :accessor error-code :initarg :error-code :initform 0))
+  (:report (lambda (condition stream)
+             (format stream "SQL error ~a while executing ~a"
+                     (error-code condition)
+                     (statement condition)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; UUIDs
 
 #+:unix
 (defun create-uuid ()
   (with-open-file (f "/proc/sys/kernel/random/uuid")
-    (values (read-line f nil nil))))
+    (read-line f nil nil)))
 
 #+:windows
 (defun create-uuid ()

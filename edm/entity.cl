@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author        Michael Kappert 2012
-;;; Last Modified <michael 2019-12-14 15:41:01>
+;;; Last Modified <michael 2020-01-29 16:56:27>
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Design
@@ -298,7 +298,7 @@
                                       :reader (slot-reader-name entity f)
                                       :writer (slot-writer-name entity f)))))
                            (entity-elements entity))))
-    (ensure-tuple-class% 'entity-class class-name slotspecs)))
+    (ensure-tuple-class% 'entity-class nil class-name slotspecs)))
 
 (defmethod slot-reader-name (entity (element element))
   (read-from-string (concatenate 'string (entity-schema entity) "." (symbol-name (name element)) "%")

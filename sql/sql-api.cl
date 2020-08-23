@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    High-level SQL API
 ;;; Author         Michael Kappert 2013
-;;; Last Modified  <michael 2019-12-25 21:58:25>
+;;; Last Modified  <michael 2020-01-16 16:25:58>
 
 (in-package :sql)
 
@@ -65,6 +65,12 @@
 
 (defun get-schema-by-name (name)
   (gethash name *schema-lib*))
+
+(defun schema-table (schema-name table-name)
+  (find table-name
+        (schema-tables (get-schema-by-name schema-name))
+        :key #'tabdef-name
+        :test #'string=))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; create schema

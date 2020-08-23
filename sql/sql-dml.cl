@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2020-01-09 22:18:07>
+;;; Last Modified <michael 2020-01-28 15:58:33>
  
 (in-package :sql)
  
@@ -78,6 +78,7 @@
 (defstruct sql-range-predicate column lower upper)
 (defstruct sql-alnum-expression op left right)
 (defstruct sql-function name arguments)
+(defstruct sql-postfix expr name)
 (defstruct sql-tuple elements)
 (defstruct sql-assignment colex valex)
 (defstruct sql-range-enum values)
@@ -238,6 +239,11 @@
 (defun ?some (argument)
   (make-sql-function :name "SOME" :arguments (list argument)))
 
+(defun ?null (argument)
+  (make-sql-postfix :expr argument :name "ISNULL"))
+
+(defun ?not-null (argument)
+  (make-sql-postfix :expr argument :name "NOTNULL"))
 
 (defun ?between (column lower upper)
   (make-sql-range-predicate :column column :lower lower :upper upper))

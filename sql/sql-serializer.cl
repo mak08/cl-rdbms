@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2020-01-09 22:19:56>
+;;; Last Modified <michael 2020-01-28 15:55:23>
 
 (in-package :sql)
 
@@ -24,6 +24,13 @@
 (defmethod serialize-for-connection ((connection t) (thing list) stream)
   (!{} connection thing stream))
 
+
+;;; We print T and NIL in quotes because they are most likely not column names.
+;;; ToDo: IS there semothing better than EQL specializers?
+(defmethod serialize-for-connection ((connection t) (thing (eql nil)) stream)
+  (format stream "'~a'" thing))
+(defmethod serialize-for-connection ((connection t) (thing (eql t)) stream)
+  (format stream "'~a'" thing))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DDL statements
@@ -213,6 +220,10 @@
   (format stream "~a(" (sql-function-name thing))
   (!{} connection (sql-function-arguments thing) stream)
   (format stream ")"))
+
+(defmethod serialize-for-connection ((connection t) (thing sql-postfix) stream)
+  (format stream "(~a)" (sql-postfix-expr thing))
+  (format stream " ~a " (sql-postfix-name thing)))
 
 (defmethod serialize-for-connection ((connection t) (thing sql-comparison) stream)
   (format stream "(")

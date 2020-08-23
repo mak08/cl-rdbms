@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2020-01-09 21:08:33>
+;;; Last Modified <michael 2020-07-16 23:44:15>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -36,6 +36,11 @@
    ;; The backends define methods for their own connection class.
    load-schema
 
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Conditions
+   sql-error
+   sql-locked
+   sql-other
    
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Embedded SQL - DDL Entities 
@@ -63,6 +68,8 @@
    get-schema-by-name
    find-db-schema
 
+   clear-schame
+   
    schema
    schema-create-statement
    schema-create-statement-name
@@ -252,6 +259,8 @@
    ?>
    ?>=
    ?<>
+   ?null
+   ?not-null
    ?like
    ?in
    ?between
