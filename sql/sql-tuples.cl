@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description    db interface
 ;;; Author         Michael Kappert 2011
-;;; Last Modified  <michael 2020-03-03 00:46:14>
+;;; Last Modified  <michael 2021-05-10 22:02:35>
 
 (in-package :sql)
 
@@ -149,7 +149,8 @@
                                                                              (loop
                                                                                 :for c :in conflict-columns
                                                                                 :for v :in conflict-values
-                                                                                :collect (?= c v)))))))))
+                                                                                :collect (?= c v)))))))
+    tuple))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Creating tuple classes
