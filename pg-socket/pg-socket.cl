@@ -1,12 +1,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Copyright      (c)  2014
-;;; Last Modified  <michael 2018-01-13 00:52:32>
+;;; Last Modified  <michael 2021-03-20 20:59:50>
 
 (in-package :pg-socket)
-
-(declaim (optimize (debug 3)))
-;; (declaim (optimize (speed 3) (safety 1) (space 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; API functions
