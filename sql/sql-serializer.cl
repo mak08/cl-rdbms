@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2020-01-28 15:55:23>
+;;; Last Modified <michael 2021-05-17 20:48:13>
 
 (in-package :sql)
 
@@ -19,7 +19,19 @@
   (format stream "'~a'" thing))
 
 (defmethod serialize-for-connection ((connection t) (thing string) stream)
-  (format stream "'~a'" thing))
+  (let ((escaped (if (position #\' thing)
+                     (sql-escape thing)
+                     thing)))
+    (format stream "'~a'" escaped)))
+
+(defun sql-escape (string)
+  (concatenate 'string
+               (loop
+                 :for c :across string
+                 :when (eql c #\')
+                   :collect c
+                 :collect c)))
+                 
 
 (defmethod serialize-for-connection ((connection t) (thing list) stream)
   (!{} connection thing stream))
