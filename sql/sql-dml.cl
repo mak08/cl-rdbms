@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2013
-;;; Last Modified <michael 2020-01-28 15:58:33>
+;;; Last Modified <michael 2021-05-23 14:43:57>
  
 (in-package :sql)
  
@@ -227,6 +227,9 @@
                        :column column
                        :value value))
  
+(defun ?upper (argument)
+  (make-sql-function :name "UPPER" :arguments (list argument)))
+
 (defun ?max (argument)
   (make-sql-function :name "MAX" :arguments (list argument)))
 

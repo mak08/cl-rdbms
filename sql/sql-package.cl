@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael 2014
-;;; Last Modified <michael 2020-07-16 23:44:15>
+;;; Last Modified <michael 2021-05-23 14:44:29>
 
 (defpackage "SQL"
   (:use "COMMON-LISP"
@@ -264,6 +264,7 @@
    ?like
    ?in
    ?between
+   ?upper
    ?max
    ?min
    ?some
