@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2020-05-17 00:56:29>
+;;; Last Modified <michael 2021-05-30 15:42:04>
 
 (in-package "SQLITE-CLIENT")
 
@@ -210,9 +210,9 @@
 (eval-when (:load-toplevel :compile-toplevel :execute)
   (define-foreign-library libsqlite3
     (:unix
-     "libsqlite3.so.0")
+     "/usr/local/lib/libsqlite3.so")
     (t
-     (:default "libsqlite3")))
+     (:default "/usr/local/lib/libsqlite3.so")))
   (define-foreign-library libuuid
     (:unix
      "libuuid.so.1.3.0")
