@@ -1,0 +1,40 @@
+================================================================================
+ToDo
+--------------------------------------------------------------------------------
+
+*   Rename to cl-edm?
+
+*   Drop PG-SOCKET
+
+*   REGRESSION: Fix PG-CLIENT
+
+*   BUG: Fix package usage in ensure-tuple-class
+
+*   Check SQL package exports (exported functions may be clobbered in backend package)
+
+*   Support more SQL functions / clauses
+    *   Views
+    *   CREATE TABLE ... AS <expression>
+
+*   Extend defschema/deftable: constraint/column NOT NULL etc.
+
+*   SELECT: check/add support for scalar results
+
+*   Use SQL-STATEMENTs for all DDL commands
+
+*   Support inserting multiple rows in one INSERT call
+
+*   Support prepared statements
+
+*   SQLite: Support for all table modifications (delete column, add/delete constraint)
+
+*   SQLite: Handling of CASCADE when not supported directly
+
+*   SQLite: SELECT: return values of proper type (integer, float, string, byte sequence)
+
+*   SQLite: BLOB support
+
+*   SQLite: fetch data typed in SQL-EXEC%
+
+--------------------------------------------------------------------------------
+================================================================================
