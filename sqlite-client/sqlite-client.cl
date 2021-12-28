@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2021-12-28 18:18:21>
+;;; Last Modified <michael 2021-12-28 22:04:43>
 
 (in-package "SQLITE-CLIENT")
 
@@ -261,7 +261,7 @@
          (mode (logior rw-mode mt-mode))
          (result (sqlite3_open_v2 filename db mode (null-pointer))))
     (unless (eql mt-mode +SQLITE_OPEN_FULLMUTEX+)
-      (log2:warning "Connections are not serialized")) 
+      (log2:info "Connections are not serialized")) 
     (case result
       (#.+SQLITE_OK+
        (mem-ref db :pointer))
