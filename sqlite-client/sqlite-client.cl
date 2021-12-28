@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2021-06-08 21:31:18>
+;;; Last Modified <michael 2021-12-28 18:18:21>
 
 (in-package "SQLITE-CLIENT")
 
@@ -102,23 +102,24 @@
   ((database :accessor database :initarg :database)
    (conn :accessor conn :initarg :conn)))
 
-(defmacro with-open-connection ((connection database &key (if-does-not-exist :fail)) &body forms)
+(defmacro with-open-connection ((connection database &key (if-does-not-exist :fail) (mt-mode +SQLITE_OPEN_NOMUTEX+)) &body forms)
   "Provides a new connection"
   `(progn
-     (log2:info "Opening ~a" (truename ,database))
+     (log2:trace "Opening ~a" (truename ,database))
      (ecase ,if-does-not-exist ((:fail :create)))
      (when (and (eq ,if-does-not-exist :fail)
                 (not (probe-file ,database)))
        (error "Database ~a does not exist." ,database))
      (let ((,connection
-          (%connect% ,database))
-         (values))
-     (unwind-protect
-          (setf values
-                (multiple-value-list 
-                 (progn ,@forms)))
-       (%disconnect% ,connection))
-     (values-list values))))
+             (%connect% ,database ,mt-mode))
+           (values nil))
+       (unwind-protect
+            (setf values
+                  (multiple-value-list 
+                   (progn ,@forms)))
+         (log2:trace "Closing ~a" (truename ,database))
+         (%disconnect% ,connection))
+       (values-list values))))
 
 (defmacro with-current-connection ((connection database &key (if-does-not-exist :fail)) &body forms)
   `(with-open-connection (,connection ,database :if-does-not-exist ,if-does-not-exist)
@@ -134,19 +135,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation
 
-(defun %connect% (database)
-  (let* ((db (sqlite3-open-v2 database))
+(defun %connect% (database mt-mode)
+  (let* ((db (sqlite3-open-v2 database :mt-mode mt-mode))
          (conn (make-instance 'sqlite-connection
                    :database database
                    :conn db)))
     ;; Create the __schema table if it does not exist.
     (multiple-value-bind (_ rows)
         (sql-exec conn "SELECT NAME FROM SQLITE_MASTER WHERE (NAME = '__schema')")
+        (declare (ignore _))
       (unless rows
         (sql-exec conn "CREATE TABLE __schema (NAME)")))
     ;; Attach registered schemas
     (multiple-value-bind (_ rows)
         (sql-exec conn "SELECT NAME FROM __SCHEMA")
+        (declare (ignore _))
       (dolist (row rows)
         (let* ((schema (car row))
                (directory (pathname-directory database))
@@ -251,9 +254,14 @@
   (filename :string)
   (database :pointer))
 
-(defun sqlite3-open-v2 (filename &key (mode (logior +SQLITE_OPEN_READWRITE+ +SQLITE_OPEN_CREATE+)))
+(defun sqlite3-open-v2 (filename &key
+                                   (rw-mode (logior +SQLITE_OPEN_READWRITE+ +SQLITE_OPEN_CREATE+))
+                                   (mt-mode +SQLITE_OPEN_NOMUTEX+))
   (let* ((db (foreign-alloc :pointer))
+         (mode (logior rw-mode mt-mode))
          (result (sqlite3_open_v2 filename db mode (null-pointer))))
+    (unless (eql mt-mode +SQLITE_OPEN_FULLMUTEX+)
+      (log2:warning "Connections are not serialized")) 
     (case result
       (#.+SQLITE_OK+
        (mem-ref db :pointer))
