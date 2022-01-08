@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description
 ;;; Author         Michael Kappert 2019
-;;; Last Modified <michael 2021-12-28 18:29:14>
+;;; Last Modified <michael 2021-12-31 15:20:03>
 
 (defpackage :sqlite-client
   (:use "COMMON-LISP" "CFFI" "SQL")
@@ -9,6 +9,7 @@
   (:export "WITH-CURRENT-CONNECTION"
 
            "%CONNECT%"
+           "%DISCONNECT%"
 
            "SQLITE3-LIBVERSION"
 
