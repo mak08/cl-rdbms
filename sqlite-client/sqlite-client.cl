@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Description   sqlite3 API and CFFI bindings for libsqlite3
 ;;; Author        Michael Kappert 2019
-;;; Last Modified <michael 2021-12-28 22:04:43>
+;;; Last Modified <michael 2022-08-31 20:40:22>
 
 (in-package "SQLITE-CLIENT")
 
@@ -121,8 +121,8 @@
          (%disconnect% ,connection))
        (values-list values))))
 
-(defmacro with-current-connection ((connection database &key (if-does-not-exist :fail)) &body forms)
-  `(with-open-connection (,connection ,database :if-does-not-exist ,if-does-not-exist)
+(defmacro with-current-connection ((connection database &key (if-does-not-exist :fail) (mt-mode +SQLITE_OPEN_NOMUTEX+)) &body forms)
+  `(with-open-connection (,connection ,database :if-does-not-exist ,if-does-not-exist  :mt-mode ,mt-mode)
      (with-connection (,connection)
        ,@forms)))
 
@@ -160,8 +160,8 @@
                                            :type suffix)))
           (sql-exec conn (format () "ATTACH '~a' AS ~a" schema-path schema)))))
     ;; Use the new and faster WAL mode sqlite.org/wal.html
-    ;; (sql-exec conn "PRAGMA journal_mode = wal;")
-    (sql-exec conn "PRAGMA foreign_keys = ON;")
+    (sql-exec conn "PRAGMA journal_mode=WAL;")
+    (sql-exec conn "PRAGMA foreign_keys=ON;")
     conn))
 
 (defun %disconnect% (connection) 
